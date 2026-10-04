@@ -1,8 +1,8 @@
 // Shared setup for every page: Firebase, small helpers, and "my groups".
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, getDoc, setDoc, deleteField, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { t, locale } from "./i18n.js?v=202610041409";
-import { firebaseConfig } from "./firebase-config.js?v=202610041409";
+import { t, locale } from "./i18n.js?v=202610041415";
+import { firebaseConfig } from "./firebase-config.js?v=202610041415";
 
 // Lets the site install as an app and open quickly on a weak connection.
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
@@ -70,7 +70,7 @@ export function signInError(e){
 
 // ---------- My groups ----------
 // Kept on this device, and copied to your account when you're signed in.
-// Each entry: { groupName, myName, secret, organizer, updated }
+// Each entry: { groupName, myName, secret, organizer, archived, updated }
 const KEY = "ss-my-groups";
 export function localGroups(){ try { return JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { return {}; } }
 function saveLocal(m){ try { localStorage.setItem(KEY, JSON.stringify(m)); } catch (e) {} }
@@ -98,6 +98,9 @@ export async function dropSecret(gid){
   const user = await authReady();
   if (user) { try { await setDoc(doc(db, "users", user.uid), { groups: { [gid]: m[gid] } }, { merge: true }); } catch (e) {} }
 }
+
+// Archiving hides a group from the main list without forgetting it (personal link and all).
+export const setArchived = (gid, on) => rememberGroup(gid, { archived: !!on });
 
 export async function forgetGroup(gid){
   const m = localGroups(); delete m[gid]; saveLocal(m);

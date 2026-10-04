@@ -408,9 +408,10 @@ export default {
   "Invite people to {name}": "{name}에 사람들 초대하기",
   "Invite link copied": "초대 링크를 복사했어요",
   "Privacy policy": "개인정보 처리방침",
-  "Removed groups you organize": "목록에서 지운 내가 만든 그룹",
-  "You took these off your list. They still exist, and you're still the organizer.": "목록에서만 지운 그룹이에요. 그룹은 그대로 있고, 여전히 내가 주최자예요.",
-  "Add back": "다시 추가",
-  "This only removes it from this list. You can add it back anytime while signed in with Google.": "이 목록에서만 지워져요. Google로 로그인하면 언제든 다시 추가할 수 있어요.",
-  "Sign in with Google to keep your groups on all your devices and find any group you organize. You don't need to sign in to join a group.": "Google로 로그인하면 모든 기기에서 그룹을 볼 수 있고, 내가 만든 그룹도 언제든 찾을 수 있어요. 그룹에 참여할 때는 로그인할 필요가 없어요."
+  "Archive": "보관",
+  "Unarchive": "보관 해제",
+  "Archive {name}": "{name} 보관하기",
+  "Unarchive {name}": "{name} 보관 해제하기",
+  "Archived ({n})": "보관함 ({n})",
+  "Archived groups are tucked away here. Nothing is deleted, and you can bring one back anytime.": "보관한 그룹은 여기에 모여 있어요. 지워지는 건 없고, 언제든 다시 꺼낼 수 있어요."
 };

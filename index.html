@@ -38,16 +38,16 @@
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js">
-<link rel="modulepreload" href="./app.js?v=202610041409">
-<link rel="modulepreload" href="./i18n.js?v=202610041409">
-<link rel="modulepreload" href="./santa-loader.js?v=202610041409">
-<link rel="modulepreload" href="./nav.js?v=202610041409">
-<link rel="modulepreload" href="./calendar.js?v=202610041409">
-<link rel="modulepreload" href="./firebase-config.js?v=202610041409">
+<link rel="modulepreload" href="./app.js?v=202610041415">
+<link rel="modulepreload" href="./i18n.js?v=202610041415">
+<link rel="modulepreload" href="./santa-loader.js?v=202610041415">
+<link rel="modulepreload" href="./nav.js?v=202610041415">
+<link rel="modulepreload" href="./calendar.js?v=202610041415">
+<link rel="modulepreload" href="./firebase-config.js?v=202610041415">
 <!-- Fonts load without holding up the page -->
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Jua&family=Figtree:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Jua&family=Figtree:wght@400;500;600;700&display=swap"></noscript>
-<link rel="stylesheet" href="style.css?v=202610041409">
+<link rel="stylesheet" href="style.css?v=202610041415">
 </head>
 <body>
 <div class="wrap">
@@ -69,11 +69,11 @@
       <p class="hint">Got an invite link from someone? Open it and join with your name. Your group will show up here.</p>
       <p class="hint" data-i18n-html>Want to run your own? Tap <b>Start a group</b>.</p>
     </div>
-    <div id="removedBox" class="panel" hidden>
-      <span class="label">Removed groups you organize</span>
-      <p class="hint">You took these off your list. They still exist, and you're still the organizer.</p>
-      <div id="removedList" class="removedlist"></div>
-    </div>
+    <details id="archivedBox" class="panel archivedbox" hidden>
+      <summary id="archivedSummary"></summary>
+      <p class="hint">Archived groups are tucked away here. Nothing is deleted, and you can bring one back anytime.</p>
+      <div id="archivedList" class="archivedlist"></div>
+    </details>
   </section>
 
   <!-- Start a group -->
@@ -102,7 +102,7 @@
     <div class="panel">
       <div id="signedOutBox">
         <span class="label">Use more than one phone or computer?</span>
-        <p class="hint">Sign in with Google to keep your groups on all your devices and find any group you organize. You don't need to sign in to join a group.</p>
+        <p class="hint">Sign in with Google to keep your groups on all your devices. You don't need to sign in to join a group.</p>
         <div class="row"><button type="button" id="signInBtn">Sign in with Google</button></div>
       </div>
       <div id="signedInBox" hidden>
@@ -122,16 +122,16 @@ setTimeout(function(){ if (window.__ssReady) return; var d=document.createElemen
 </script>
 <script type="module">
 import { configured, db, auth, loadAuth, $, el, msg, randomId, fmtDate, personalLink, groupLink, organizeLink,
-         authReady, signInWithGoogle, signOutNow, signInError, localGroups, rememberGroup, forgetGroup, syncAccount, ownedGroups,
-         copyText, canShare, shareInvite, formatMoney, currencyOf } from "./app.js?v=202610041409";
+         authReady, signInWithGoogle, signOutNow, signInError, localGroups, rememberGroup, setArchived, syncAccount, ownedGroups,
+         copyText, canShare, shareInvite, formatMoney, currencyOf } from "./app.js?v=202610041415";
 import { doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { showLoading, hideLoading } from "./santa-loader.js?v=202610041409";
+import { showLoading, hideLoading } from "./santa-loader.js?v=202610041415";
 window.__ssReady = true;
 const { onAuthStateChanged } = (await loadAuth()) || {};
-import { calendarIcon } from "./calendar.js?v=202610041409";
-import { t, startTranslating } from "./i18n.js?v=202610041409";
+import { calendarIcon } from "./calendar.js?v=202610041415";
+import { t, startTranslating } from "./i18n.js?v=202610041415";
 startTranslating();
-import { mountNav } from "./nav.js?v=202610041409";
+import { mountNav } from "./nav.js?v=202610041415";
 mountNav();
 
 if (!configured) { const f = $("fatal"); f.textContent = "This site isn't set up yet. Add the Firebase settings to firebase-config.js."; f.hidden = false; throw new Error("not configured"); }
@@ -143,9 +143,10 @@ const photos = {};    // gid -> photo data URL
 const photoSubs = {};
 let mine = localGroups();
 
+const active = gid => mine[gid] && !mine[gid].archived;
 function watchGroups(){
   Object.keys(mine).forEach(gid => {
-    if (subs[gid]) return;
+    if (subs[gid] || !active(gid)) return;
     subs[gid] = onSnapshot(doc(db, "groups", gid), s => {
       live[gid] = s.exists() ? s.data() : null;
       if (s.exists() && s.data().ev && s.data().ev !== mine[gid].groupName) rememberGroup(gid, { groupName: s.data().ev });
@@ -153,12 +154,12 @@ function watchGroups(){
     }, () => { live[gid] = null; render(); });
     photoSubs[gid] = onSnapshot(doc(db, "groups", gid, "public", "photo"), s => { photos[gid] = s.exists() ? s.data().data : null; render(); }, () => {});
   });
-  Object.keys(subs).forEach(gid => { if (!mine[gid]) { subs[gid](); photoSubs[gid](); delete subs[gid]; delete photoSubs[gid]; delete live[gid]; delete photos[gid]; } });
+  Object.keys(subs).forEach(gid => { if (!active(gid)) { subs[gid](); photoSubs[gid](); delete subs[gid]; delete photoSubs[gid]; delete live[gid]; delete photos[gid]; } });
 }
 
 function render(){
   const box = $("groups"); box.textContent = "";
-  const ids = Object.keys(mine).sort((a, b) => (mine[b].updated || 0) - (mine[a].updated || 0));
+  const ids = Object.keys(mine).filter(active).sort((a, b) => (mine[b].updated || 0) - (mine[a].updated || 0));
   $("empty").hidden = ids.length > 0;
   ids.forEach(gid => {
     const m = mine[gid], g = live[gid];
@@ -210,38 +211,41 @@ function render(){
       };
       actions.append(inv);
     }
-    const hide = el("button", "ghost small", "Remove from my list"); hide.type = "button";
-    const confirm = el("div", "confirm"); confirm.hidden = true;
-    confirm.append(el("span", null, m.organizer ? "This only removes it from this list. You can add it back anytime while signed in with Google." : m.secret ? "This only removes it from this list. Keep your personal link if you want to get back in." : "This only removes it from this list."));
-    const yes = el("button", "small", "Remove"); yes.type = "button";
-    const no = el("button", "small ghost", "Cancel"); no.type = "button";
-    const cr = el("div", "row"); cr.append(yes, no); confirm.append(cr);
-    hide.onclick = () => { confirm.hidden = false; hide.hidden = true; };
-    no.onclick = () => { confirm.hidden = true; hide.hidden = false; };
-    yes.onclick = async () => { await forgetGroup(gid); mine = localGroups(); watchGroups(); render(); renderRemoved(); };
-    actions.append(hide);
-    card.append(actions, confirm);
+    const arch = el("button", "ghost small", "Archive"); arch.type = "button";
+    arch.setAttribute("aria-label", t("Archive {name}", { name }));
+    arch.onclick = async () => { arch.disabled = true; await setArchived(gid, true); refresh(); };
+    actions.append(arch);
+    card.append(actions);
     box.append(card);
   });
 }
 
-// ---------- Groups you organize but took off your list ----------
+function refresh(){ mine = localGroups(); watchGroups(); render(); renderArchived(); }
+
+// ---------- Archived groups ----------
+// Groups archived on this list, plus (when signed in) any group you organize that isn't on it at all.
 let owned = [];
-async function loadOwned(user){ owned = user ? await ownedGroups(user) : []; renderRemoved(); }
-function renderRemoved(){
-  const gone = owned.filter(o => !mine[o.gid]).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-  const list = $("removedList"); list.textContent = "";
-  $("removedBox").hidden = gone.length === 0;
-  gone.forEach(o => {
-    const row = el("div", "row spread removedrow");
-    const n = el("span", "removedname", o.name || t("Secret Santa group")); n.setAttribute("translate", "no");
-    const add = el("button", "small", "Add back"); add.type = "button";
-    add.onclick = async () => {
-      add.disabled = true;
-      await rememberGroup(o.gid, { groupName: o.name, organizer: true });
-      mine = localGroups(); watchGroups(); render(); renderRemoved();
+async function loadOwned(user){ owned = user ? await ownedGroups(user) : []; renderArchived(); }
+function renderArchived(){
+  const items = Object.keys(mine).filter(gid => mine[gid].archived)
+    .map(gid => ({ gid, name: mine[gid].groupName, when: mine[gid].updated || 0, known: true }))
+    .sort((a, b) => b.when - a.when);
+  owned.filter(o => !mine[o.gid]).forEach(o => items.push({ gid: o.gid, name: o.name, known: false }));
+  const list = $("archivedList"); list.textContent = "";
+  $("archivedBox").hidden = items.length === 0;
+  $("archivedSummary").textContent = t("Archived ({n})", { n: items.length });
+  items.forEach(o => {
+    const row = el("div", "row spread archivedrow");
+    const n = el("span", "archivedname", o.name || t("Secret Santa group")); n.setAttribute("translate", "no");
+    const back = el("button", "small", "Unarchive"); back.type = "button";
+    back.setAttribute("aria-label", t("Unarchive {name}", { name: o.name || t("Secret Santa group") }));
+    back.onclick = async () => {
+      back.disabled = true;
+      if (o.known) await setArchived(o.gid, false);
+      else await rememberGroup(o.gid, { groupName: o.name, organizer: true, archived: false });
+      refresh();
     };
-    row.append(n, add); list.append(row);
+    row.append(n, back); list.append(row);
   });
 }
 
@@ -254,7 +258,7 @@ showLoading("Santa's fetching your groups…");   // appears only if loading tak
 authReady().then(async user => {
   showAccount(user);
   if (user) mine = await syncAccount(user);
-  watchGroups(); render();
+  watchGroups(); render(); renderArchived();
   loadOwned(user);
 }).finally(hideLoading);
 onAuthStateChanged(auth, user => showAccount(user));
@@ -265,7 +269,7 @@ $("signInBtn").onclick = async () => {
   catch (e) { msg("authMsg", "err", signInError(e)); }
   finally { hideLoading(); }
 };
-$("signOutBtn").onclick = () => { owned = []; renderRemoved(); signOutNow(); };
+$("signOutBtn").onclick = () => { owned = []; renderArchived(); signOutNow(); };
 
 // ---------- Start a group ----------
 $("startBtn").onclick = async () => {
