@@ -10,6 +10,27 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 
 <title>Secret Santa</title>
+<script>
+// Coming from the old address? It hands over this device's saved groups and language
+// in the "#import=" part of the link (that part never leaves the phone), then we tidy the link.
+(function(){
+  var h = location.hash;
+  if (h.indexOf("#import=") !== 0) return;
+  try {
+    var b = h.slice(8).replace(/-/g, "+").replace(/_/g, "/");
+    var data = JSON.parse(decodeURIComponent(escape(atob(b))));
+    var mine = {}; try { mine = JSON.parse(localStorage.getItem("ss-my-groups") || "{}") || {}; } catch (e) {}
+    Object.keys(data.g || {}).forEach(function(gid){
+      var a = mine[gid] || {}, c = data.g[gid] || {};
+      mine[gid] = Object.assign({}, c, a, { secret: a.secret || c.secret || null, organizer: !!(a.organizer || c.organizer) });
+    });
+    localStorage.setItem("ss-my-groups", JSON.stringify(mine));
+    if (data.l && !localStorage.getItem("ss-lang")) localStorage.setItem("ss-lang", data.l);
+  } catch (e) {}
+  history.replaceState(null, "", location.pathname + location.search);
+})();
+</script>
+
 <link rel="preconnect" href="https://www.gstatic.com">
 <link rel="preconnect" href="https://firestore.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

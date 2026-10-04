@@ -1,6 +1,6 @@
 # Secret Santa website: setup guide
 
-Your site: **https://ericashan.github.io/secret-santa/**
+Your site: **https://secret-santa-draw.github.io/**
 
 The website files and your Firebase settings are already in this repository. What's left happens in Firebase and GitHub settings, and works on a phone.
 
@@ -18,7 +18,7 @@ You don't need to edit anything in the rules. Whenever this file changes, paste 
 ## 3. Google sign-in (for organizers and optional syncing)
 1. **Build → Authentication → Get started.**
 2. **Sign-in method → Google**, switch it on, pick your email as the support email, **Save**.
-3. **Settings → Authorized domains → Add domain**, enter `ericashan.github.io`.
+3. **Settings → Authorized domains → Add domain**, enter `secret-santa-draw.github.io`.
 
 ## 4. Turn on the website
 1. In this repository: **Settings → Pages**.

@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "io.github.ereeqa.twa",
+      "sha256_cert_fingerprints": [
+        "B3:17:3A:0F:A8:07:2D:5D:D2:18:23:76:44:A2:B8:55:CF:F5:F2:5A:7F:83:36:6F:1C:71:63:83:E2:34:3A:F8"
+      ]
+    }
+  }
+]
