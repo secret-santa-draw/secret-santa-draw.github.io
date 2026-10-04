@@ -1,8 +1,8 @@
 // Shared setup for every page: Firebase, small helpers, and "my groups".
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, getDoc, setDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { t, locale } from "./i18n.js?v=202610041152";
-import { firebaseConfig } from "./firebase-config.js?v=202610041152";
+import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, getDoc, setDoc, deleteField, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { t, locale } from "./i18n.js?v=202610041409";
+import { firebaseConfig } from "./firebase-config.js?v=202610041409";
 
 // Lets the site install as an app and open quickly on a weak connection.
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
@@ -103,6 +103,15 @@ export async function forgetGroup(gid){
   const m = localGroups(); delete m[gid]; saveLocal(m);
   const user = await authReady();
   if (user) { try { await setDoc(doc(db, "users", user.uid), { groups: { [gid]: deleteField() } }, { merge: true }); } catch (e) {} }
+}
+
+// Every group this account organizes, so one removed from the list can be added back.
+export async function ownedGroups(user){
+  if (!user) return [];
+  try {
+    const snap = await getDocs(query(collection(db, "groups"), where("ownerUid", "==", user.uid)));
+    return snap.docs.map(d => ({ gid: d.id, name: d.data().ev || "", createdAt: d.data().createdAt || 0 }));
+  } catch (e) { return []; }
 }
 
 // Combine this device's groups with the account's, and save the result in both places.

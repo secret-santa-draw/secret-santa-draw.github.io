@@ -241,3 +241,7 @@ a.button.small{padding:6px 12px;font-size:.875rem}
 .invitebtn{display:inline-flex;align-items:center;gap:6px}
 .invitebtn svg{color:var(--accent)}
 .navfoot{margin-top:auto;border-top:1px solid var(--line);padding-top:8px}
+.removedlist{display:flex;flex-direction:column;gap:4px}
+.removedrow{align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--soft)}
+.removedrow:first-child{border-top:0}
+.removedname{font-weight:600;overflow-wrap:anywhere}

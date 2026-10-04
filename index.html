@@ -38,16 +38,16 @@
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js">
-<link rel="modulepreload" href="./app.js?v=202610041152">
-<link rel="modulepreload" href="./i18n.js?v=202610041152">
-<link rel="modulepreload" href="./santa-loader.js?v=202610041152">
-<link rel="modulepreload" href="./nav.js?v=202610041152">
-<link rel="modulepreload" href="./calendar.js?v=202610041152">
-<link rel="modulepreload" href="./firebase-config.js?v=202610041152">
+<link rel="modulepreload" href="./app.js?v=202610041409">
+<link rel="modulepreload" href="./i18n.js?v=202610041409">
+<link rel="modulepreload" href="./santa-loader.js?v=202610041409">
+<link rel="modulepreload" href="./nav.js?v=202610041409">
+<link rel="modulepreload" href="./calendar.js?v=202610041409">
+<link rel="modulepreload" href="./firebase-config.js?v=202610041409">
 <!-- Fonts load without holding up the page -->
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Jua&family=Figtree:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Jua&family=Figtree:wght@400;500;600;700&display=swap"></noscript>
-<link rel="stylesheet" href="style.css?v=202610041152">
+<link rel="stylesheet" href="style.css?v=202610041409">
 </head>
 <body>
 <div class="wrap">
@@ -68,6 +68,11 @@
       <span class="label">Nothing here yet</span>
       <p class="hint">Got an invite link from someone? Open it and join with your name. Your group will show up here.</p>
       <p class="hint" data-i18n-html>Want to run your own? Tap <b>Start a group</b>.</p>
+    </div>
+    <div id="removedBox" class="panel" hidden>
+      <span class="label">Removed groups you organize</span>
+      <p class="hint">You took these off your list. They still exist, and you're still the organizer.</p>
+      <div id="removedList" class="removedlist"></div>
     </div>
   </section>
 
@@ -97,7 +102,7 @@
     <div class="panel">
       <div id="signedOutBox">
         <span class="label">Use more than one phone or computer?</span>
-        <p class="hint">Sign in with Google to keep your groups on all your devices. You don't need to sign in to join a group.</p>
+        <p class="hint">Sign in with Google to keep your groups on all your devices and find any group you organize. You don't need to sign in to join a group.</p>
         <div class="row"><button type="button" id="signInBtn">Sign in with Google</button></div>
       </div>
       <div id="signedInBox" hidden>
@@ -117,16 +122,16 @@ setTimeout(function(){ if (window.__ssReady) return; var d=document.createElemen
 </script>
 <script type="module">
 import { configured, db, auth, loadAuth, $, el, msg, randomId, fmtDate, personalLink, groupLink, organizeLink,
-         authReady, signInWithGoogle, signOutNow, signInError, localGroups, rememberGroup, forgetGroup, syncAccount,
-         copyText, canShare, shareInvite, formatMoney, currencyOf } from "./app.js?v=202610041152";
+         authReady, signInWithGoogle, signOutNow, signInError, localGroups, rememberGroup, forgetGroup, syncAccount, ownedGroups,
+         copyText, canShare, shareInvite, formatMoney, currencyOf } from "./app.js?v=202610041409";
 import { doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { showLoading, hideLoading } from "./santa-loader.js?v=202610041152";
+import { showLoading, hideLoading } from "./santa-loader.js?v=202610041409";
 window.__ssReady = true;
 const { onAuthStateChanged } = (await loadAuth()) || {};
-import { calendarIcon } from "./calendar.js?v=202610041152";
-import { t, startTranslating } from "./i18n.js?v=202610041152";
+import { calendarIcon } from "./calendar.js?v=202610041409";
+import { t, startTranslating } from "./i18n.js?v=202610041409";
 startTranslating();
-import { mountNav } from "./nav.js?v=202610041152";
+import { mountNav } from "./nav.js?v=202610041409";
 mountNav();
 
 if (!configured) { const f = $("fatal"); f.textContent = "This site isn't set up yet. Add the Firebase settings to firebase-config.js."; f.hidden = false; throw new Error("not configured"); }
@@ -207,16 +212,36 @@ function render(){
     }
     const hide = el("button", "ghost small", "Remove from my list"); hide.type = "button";
     const confirm = el("div", "confirm"); confirm.hidden = true;
-    confirm.append(el("span", null, m.secret ? "This only removes it from this list. Keep your personal link if you want to get back in." : "This only removes it from this list."));
+    confirm.append(el("span", null, m.organizer ? "This only removes it from this list. You can add it back anytime while signed in with Google." : m.secret ? "This only removes it from this list. Keep your personal link if you want to get back in." : "This only removes it from this list."));
     const yes = el("button", "small", "Remove"); yes.type = "button";
     const no = el("button", "small ghost", "Cancel"); no.type = "button";
     const cr = el("div", "row"); cr.append(yes, no); confirm.append(cr);
     hide.onclick = () => { confirm.hidden = false; hide.hidden = true; };
     no.onclick = () => { confirm.hidden = true; hide.hidden = false; };
-    yes.onclick = async () => { await forgetGroup(gid); mine = localGroups(); watchGroups(); render(); };
+    yes.onclick = async () => { await forgetGroup(gid); mine = localGroups(); watchGroups(); render(); renderRemoved(); };
     actions.append(hide);
     card.append(actions, confirm);
     box.append(card);
+  });
+}
+
+// ---------- Groups you organize but took off your list ----------
+let owned = [];
+async function loadOwned(user){ owned = user ? await ownedGroups(user) : []; renderRemoved(); }
+function renderRemoved(){
+  const gone = owned.filter(o => !mine[o.gid]).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  const list = $("removedList"); list.textContent = "";
+  $("removedBox").hidden = gone.length === 0;
+  gone.forEach(o => {
+    const row = el("div", "row spread removedrow");
+    const n = el("span", "removedname", o.name || t("Secret Santa group")); n.setAttribute("translate", "no");
+    const add = el("button", "small", "Add back"); add.type = "button";
+    add.onclick = async () => {
+      add.disabled = true;
+      await rememberGroup(o.gid, { groupName: o.name, organizer: true });
+      mine = localGroups(); watchGroups(); render(); renderRemoved();
+    };
+    row.append(n, add); list.append(row);
   });
 }
 
@@ -230,16 +255,17 @@ authReady().then(async user => {
   showAccount(user);
   if (user) mine = await syncAccount(user);
   watchGroups(); render();
+  loadOwned(user);
 }).finally(hideLoading);
 onAuthStateChanged(auth, user => showAccount(user));
 
 $("signInBtn").onclick = async () => {
   msg("authMsg", "", "");
-  try { showLoading("Checking Santa's list…"); await signInWithGoogle(); mine = localGroups(); watchGroups(); render(); }
+  try { showLoading("Checking Santa's list…"); const u = await signInWithGoogle(); mine = localGroups(); watchGroups(); render(); loadOwned(u); }
   catch (e) { msg("authMsg", "err", signInError(e)); }
   finally { hideLoading(); }
 };
-$("signOutBtn").onclick = () => signOutNow();
+$("signOutBtn").onclick = () => { owned = []; renderRemoved(); signOutNow(); };
 
 // ---------- Start a group ----------
 $("startBtn").onclick = async () => {

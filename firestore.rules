@@ -18,7 +18,8 @@ service cloud.firestore {
     match /groups/{gid} {
       // Anyone with the group's link can see its name, budget, date and whether names are drawn.
       allow get: if true;
-      allow list: if false;
+      // Organizers can look up the groups they run (to add one back to their list). Nobody can browse other people's groups.
+      allow list: if signedIn() && resource.data.ownerUid == request.auth.uid;
       // Anyone signed in with Google can start a group and becomes its organizer.
       allow create: if signedIn()
         && gid.size() >= 10
