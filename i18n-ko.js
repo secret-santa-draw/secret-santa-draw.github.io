@@ -413,5 +413,6 @@ export default {
   "Archive {name}": "{name} 보관하기",
   "Unarchive {name}": "{name} 보관 해제하기",
   "Archived ({n})": "보관함 ({n})",
-  "Archived groups are tucked away here. Nothing is deleted, and you can bring one back anytime.": "보관한 그룹은 여기에 모여 있어요. 지워지는 건 없고, 언제든 다시 꺼낼 수 있어요."
+  "Archived groups are tucked away here. Nothing is deleted, and you can bring one back anytime.": "보관한 그룹은 여기에 모여 있어요. 지워지는 건 없고, 언제든 다시 꺼낼 수 있어요.",
+  "Organizer view": "주최자 화면"
 };

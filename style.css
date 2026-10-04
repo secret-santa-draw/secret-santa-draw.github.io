@@ -250,3 +250,9 @@ a.button.small{padding:6px 12px;font-size:.875rem}
 .archivedrow{align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--soft)}
 .archivedrow:first-child{border-top:0}
 .archivedname{font-weight:600;overflow-wrap:anywhere}
+
+/* Organizer page: warm worksheet paper and evergreen accents, so it never looks like a participant page */
+body.org{--bg:#f4efe3;--soft:#e9e1cd;--line:#dcd1b8;--accent:#1f5a45;--accent-ink:#ffffff}
+@media (prefers-color-scheme: dark){body.org{--bg:#1b1912;--paper:#25221a;--soft:#2f2b20;--line:#433c2c;--accent:#6fc39f;--accent-ink:#0f1c18}}
+body.org .badge.warn{background:color-mix(in srgb,var(--err) 14%,transparent);color:var(--err)}
+.modebadge{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:4px 12px 4px 10px;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
