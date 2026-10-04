@@ -251,8 +251,17 @@ a.button.small{padding:6px 12px;font-size:.875rem}
 .archivedrow:first-child{border-top:0}
 .archivedname{font-weight:600;overflow-wrap:anywhere}
 
-/* Organizer page: warm worksheet paper and evergreen accents, so it never looks like a participant page */
-body.org{--bg:#f4efe3;--soft:#e9e1cd;--line:#dcd1b8;--accent:#1f5a45;--accent-ink:#ffffff}
-@media (prefers-color-scheme: dark){body.org{--bg:#1b1912;--paper:#25221a;--soft:#2f2b20;--line:#433c2c;--accent:#6fc39f;--accent-ink:#0f1c18}}
+/* Organizer page: a dark evergreen "control panel" band up top and warm worksheet paper below,
+   so it never looks like a participant page */
+body.org{--bg:#f4efe3;--soft:#e9e1cd;--line:#dcd1b8;--accent:#1f5a45;--accent-ink:#ffffff;--band:#173f31;--band-ink:#f7f1e3;--band-muted:#b9cbbf}
+@media (prefers-color-scheme: dark){body.org{--bg:#1b1912;--paper:#25221a;--soft:#2f2b20;--line:#433c2c;--accent:#6fc39f;--accent-ink:#0f1c18;--band:#0c1f18;--band-ink:#f3ead2;--band-muted:#93ab9f}}
 body.org .badge.warn{background:color-mix(in srgb,var(--err) 14%,transparent);color:var(--err)}
-.modebadge{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:4px 12px 4px 10px;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+/* The band reaches the screen edges and the top of the page, behind the menu bar and title */
+body.org header{background:var(--band);box-shadow:0 0 0 100vmax var(--band);clip-path:inset(-100vmax -100vmax 0 -100vmax);padding-bottom:26px;margin-bottom:6px}
+body.org .langbar{position:relative;z-index:1}
+body.org header h1{color:var(--band-ink)}
+body.org header .hint{color:var(--band-muted)}
+body.org .navbtn,body.org .langpick{background:color-mix(in srgb,var(--band-ink) 12%,transparent);border-color:color-mix(in srgb,var(--band-ink) 28%,transparent);color:var(--band-ink)}
+body.org .langpick select{color:var(--band-ink)}
+body.org .langpick select option{color:#173a2f}
+.modebadge{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;background:var(--gold);color:#1d1606;border-radius:999px;padding:4px 12px 4px 10px;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
