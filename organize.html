@@ -17,17 +17,17 @@
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js">
-<link rel="modulepreload" href="./app.js?v=202610041508">
-<link rel="modulepreload" href="./i18n.js?v=202610041508">
-<link rel="modulepreload" href="./santa-loader.js?v=202610041508">
-<link rel="modulepreload" href="./nav.js?v=202610041508">
-<link rel="modulepreload" href="./draw.js?v=202610041508">
-<link rel="modulepreload" href="./icons.js?v=202610041508">
-<link rel="modulepreload" href="./firebase-config.js?v=202610041508">
+<link rel="modulepreload" href="./app.js?v=202610051548">
+<link rel="modulepreload" href="./i18n.js?v=202610051548">
+<link rel="modulepreload" href="./santa-loader.js?v=202610051548">
+<link rel="modulepreload" href="./nav.js?v=202610051548">
+<link rel="modulepreload" href="./draw.js?v=202610051548">
+<link rel="modulepreload" href="./icons.js?v=202610051548">
+<link rel="modulepreload" href="./firebase-config.js?v=202610051548">
 <!-- Fonts load without holding up the page -->
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Jua&family=Figtree:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Jua&family=Figtree:wght@400;500;600;700&display=swap"></noscript>
-<link rel="stylesheet" href="style.css?v=202610041508">
+<link rel="stylesheet" href="style.css?v=202610051548">
 </head>
 <body class="org">
 <div class="wrap">
@@ -102,6 +102,23 @@
         <p class="hint">If someone loses their personal link, copy it here and send it to them again. Kids are listed under their parent.</p>
         <div class="list" id="people"></div>
         <p class="hint" id="peopleHint"></p>
+        <div id="addPersonBox" class="addperson">
+          <span class="label">Add someone yourself</span>
+          <p class="hint">For anyone who'd rather you sign them up. You'll get their personal link to send them, so they can add a wishlist and see their match.</p>
+          <form id="addPersonForm" class="joinform" autocomplete="off">
+            <input id="addName" placeholder="Their name" aria-label="Their name" maxlength="40">
+            <input id="addPhone" type="tel" inputmode="tel" autocomplete="off" placeholder="Mobile number (optional)" aria-label="Their mobile number (optional)" maxlength="20">
+            <div><button class="primary" type="submit" id="addPersonBtn">Add to group</button></div>
+          </form>
+          <p id="addMsg" class="msg err" hidden></p>
+          <div id="addedBox" class="confirm" hidden>
+            <span id="addedText"></span>
+            <div class="row">
+              <button type="button" class="small primary" id="addedShare" hidden>Send their link…</button>
+              <button type="button" class="small" id="addedCopy">Copy their link</button>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -181,16 +198,16 @@ setTimeout(function(){ if (window.__ssReady) return; var d=document.createElemen
 <script type="module">
 import { configured, db, auth, loadAuth, $, el, msg, formatOf, kindOf, kidsOn, CURRENCIES, currencyOf, currencyName, currencySymbol, formatMoney, parseAmount, groupLink, personalLink, homeLink, groupIdFromUrl, copyText, fmtDate, formatPhone, smsGroupHref,
          canShare, shareInvite, photoToDataUrl, photoError,
-         authReady, signInWithGoogle, signOutNow, signInError, rememberGroup, forgetGroup } from "./app.js?v=202610041508";
+         authReady, signInWithGoogle, signOutNow, signInError, rememberGroup, forgetGroup, randomId, normalizePhone } from "./app.js?v=202610051548";
 import { doc, getDoc, setDoc, deleteDoc, onSnapshot, collection, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { showLoading, hideLoading } from "./santa-loader.js?v=202610041508";
-import { drawAll } from "./draw.js?v=202610041508";
-import { babyIcon } from "./icons.js?v=202610041508";
+import { showLoading, hideLoading } from "./santa-loader.js?v=202610051548";
+import { drawAll } from "./draw.js?v=202610051548";
+import { babyIcon, normName } from "./icons.js?v=202610051548";
 window.__ssReady = true;
 const { onAuthStateChanged } = (await loadAuth()) || {};
-import { t, startTranslating, locale } from "./i18n.js?v=202610041508";
+import { t, startTranslating, locale } from "./i18n.js?v=202610051548";
 startTranslating();
-import { mountNav } from "./nav.js?v=202610041508";
+import { mountNav } from "./nav.js?v=202610051548";
 mountNav();
 
 function fatal(t){ const f = $("fatal"); f.textContent = t; f.hidden = false; }
@@ -309,8 +326,8 @@ function render(){
     if (fmt === "mixed" && S.remote[id]) { w.append(" "); w.append(el("span", "badge", "joining virtually")); }
     if (needsAddress(id) && S.addr[id] === false) { w.append(" "); w.append(el("span", "badge warn", "no address yet")); }
     const row = el("div", "row");
-    const c = el("button", "small", "Copy their link"); c.type = "button";
-    c.onclick = () => copy(personalLink(GID, id), c, "Copy their link");
+    const c = el("button", "small", canShare() ? "Send their link" : "Copy their link"); c.type = "button";
+    c.onclick = () => sendLink(id, c);
     row.append(c);
     if (!g.drawn) { const r = el("button", "small ghost", "Remove"); r.type = "button"; r.onclick = () => removePerson(id); row.append(r); }
     it.append(w, row); list.append(it);
@@ -327,6 +344,7 @@ function render(){
     : kids.length ? t("Adults: {a} · Kids: {k} · Volunteers for kid gifts: {v}", { a: ids.length, k: kids.length, v: vols })
     : t("Adults: {a}", { a: ids.length });
 
+  $("addPersonBox").hidden = !!g.drawn;
   ["exA", "exB"].forEach(id => { const sel = $(id), v = sel.value; sel.textContent = ""; ids.forEach(p => { const o = el("option", null, nameOf(p)); o.value = p; sel.append(o); }); if (ids.includes(v)) sel.value = v; });
   if ($("exA").value && $("exA").value === $("exB").value) { const o = ids.find(i => i !== $("exA").value); if (o) $("exB").value = o; }
   const ex = $("exChips"); ex.textContent = "";
@@ -382,6 +400,44 @@ $("evKids").addEventListener("change", () => saveSetting({ kids: $("evKids").che
 async function saveExcl(list){ try { await setDoc(G("admin", "settings"), { excl: list.map(p => p.join("|")) }, { merge: true }); } catch(e){ msg("drawMsg", "err", "Couldn't save that rule. Try again."); } }
 $("addEx").onclick = () => { const a = $("exA").value, b = $("exB").value; if (!a || !b || a === b) return;
   if (S.excl.some(p => (p[0] === a && p[1] === b) || (p[0] === b && p[1] === a))) return; saveExcl(S.excl.concat([[a, b]])); };
+
+// ---------- Adding someone yourself ----------
+// Same records as joining from the invite link; the organizer then sends the person their own link.
+const linkText = (name) => t("Hi {name}! You're in our Secret Santa: {group}. This is your own link. Open it to add your wishlist, and later to see who you're buying for:", { name, group: S.game.ev || t("Secret Santa") });
+async function sendLink(id, btn){
+  const url = personalLink(GID, id), name = nameOf(id);
+  if (canShare()) { try { await navigator.share({ title: S.game.ev || "Secret Santa", text: linkText(name), url }); } catch (e) {} return; }
+  copy(url, btn, "Copy their link");
+}
+let lastAdded = null;
+$("addedShare").hidden = !canShare();
+$("addedShare").onclick = () => lastAdded && sendLink(lastAdded, $("addedShare"));
+$("addedCopy").onclick = () => lastAdded && copy(personalLink(GID, lastAdded), $("addedCopy"), "Copy their link");
+$("addName").addEventListener("input", () => msg("addMsg", "", ""));
+$("addPersonForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const name = $("addName").value.trim().replace(/\s+/g, " ");
+  if (!name) { msg("addMsg", "err", t("Type their name first.")); return; }
+  const n = normName(name);
+  const taken = Object.values(S.people).some(p => normName(p.name) === n) || Object.values(S.kids).flat().some(k => normName(k.name) === n);
+  if (taken) { msg("addMsg", "err", t("{name} is already in this group. Add a last initial if it's someone else.", { name })); return; }
+  const phone = normalizePhone($("addPhone").value);
+  if (phone === null) { msg("addMsg", "err", t("That phone number doesn't look right. Use a 10-digit US number, or start with + and the country code.")); return; }
+  const secret = randomId(), wishId = randomId(), rosterId = randomId(16), joinedAt = new Date().toISOString();
+  const b = writeBatch(db);
+  b.set(G("people", secret), { name, wishId, rosterId, joinedAt });
+  b.set(G("wishes", wishId), { name, wishlist: "" });
+  b.set(G("roster", rosterId), { name, joinedAt });
+  if (phone) b.set(G("phones", secret), { phone, updatedAt: joinedAt });
+  $("addPersonBtn").disabled = true; msg("addMsg", "", ""); showLoading("Adding them to Santa's list…");
+  try {
+    await b.commit();
+    lastAdded = secret; S.people[secret] = S.people[secret] || { name, wishId, rosterId, joinedAt };
+    $("addedText").textContent = t("{name} is in! Send them their personal link so they can add a wishlist and, after the draw, see who they're buying for.", { name });
+    $("addedBox").hidden = false; $("addName").value = ""; $("addPhone").value = "";
+  } catch (err) { msg("addMsg", "err", S.game.drawn ? t("Names have already been drawn, so nobody new can be added.") : t("Couldn't add them just now. Check your connection and try again.")); }
+  finally { hideLoading(); $("addPersonBtn").disabled = false; }
+});
 
 async function removePerson(id){
   const p = S.people[id]; if (!p) return;

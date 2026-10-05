@@ -265,3 +265,4 @@ body.org .navbtn,body.org .langpick{background:color-mix(in srgb,var(--band-ink)
 body.org .langpick select{color:var(--band-ink)}
 body.org .langpick select option{color:#173a2f}
 .modebadge{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;background:var(--gold);color:#1d1606;border-radius:999px;padding:4px 12px 4px 10px;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.addperson{display:flex;flex-direction:column;gap:10px;border-top:1px dashed var(--line);padding-top:16px}

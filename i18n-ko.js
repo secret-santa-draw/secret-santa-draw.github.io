@@ -415,5 +415,20 @@ export default {
   "Archived ({n})": "보관함 ({n})",
   "Archived groups are tucked away here. Nothing is deleted, and you can bring one back anytime.": "보관한 그룹은 여기에 모여 있어요. 지워지는 건 없고, 언제든 다시 꺼낼 수 있어요.",
   "Organizer view": "주최자 화면",
-  "Remove {name} from my list": "내 목록에서 {name} 지우기"
+  "Remove {name} from my list": "내 목록에서 {name} 지우기",
+  "Add someone yourself": "직접 추가하기",
+  "For anyone who'd rather you sign them up. You'll get their personal link to send them, so they can add a wishlist and see their match.": "대신 등록해 주길 원하는 분을 위해 직접 추가할 수 있어요. 추가하면 그분의 개인 링크가 생기니, 보내 주면 위시리스트를 쓰고 매칭 상대를 확인할 수 있어요.",
+  "Their name": "이름",
+  "Their mobile number (optional, for group texts)": "휴대폰 번호 (선택, 단체 문자용)",
+  "Their mobile number (optional)": "휴대폰 번호 (선택)",
+  "Add to group": "그룹에 추가",
+  "Send their link…": "링크 보내기…",
+  "Send their link": "링크 보내기",
+  "Type their name first.": "먼저 이름을 입력해 주세요.",
+  "{name} is already in this group. Add a last initial if it's someone else.": "{name} 님은 이미 그룹에 있어요. 다른 분이라면 성이나 이니셜을 붙여 주세요.",
+  "Adding them to Santa's list…": "산타의 명단에 추가하는 중…",
+  "{name} is in! Send them their personal link so they can add a wishlist and, after the draw, see who they're buying for.": "{name} 님을 추가했어요! 개인 링크를 보내 주면 위시리스트를 쓰고, 추첨 후에는 누구에게 선물할지 확인할 수 있어요.",
+  "Names have already been drawn, so nobody new can be added.": "이미 추첨이 끝나서 새로 추가할 수 없어요.",
+  "Couldn't add them just now. Check your connection and try again.": "지금은 추가하지 못했어요. 인터넷 연결을 확인하고 다시 시도해 주세요.",
+  "Hi {name}! You're in our Secret Santa: {group}. This is your own link. Open it to add your wishlist, and later to see who you're buying for:": "{name} 님, 안녕하세요! 시크릿 산타 “{group}”에 함께하게 됐어요. 나만의 링크예요. 열어서 위시리스트를 쓰고, 나중에 누구에게 선물할지 확인하세요:"
 };
