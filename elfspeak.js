@@ -1,8 +1,8 @@
 // Elf-speak: before a secret chat message is sent, names are bleeped out on this device and
 // the message is rewritten by an AI as a giddy, sweet elf, so nobody can tell who wrote it from
 // their tone, word choice, spelling or grammar. The original words are never stored.
-import { app } from "./app.js?v=202610080040";
-import { appCheckSiteKey } from "./firebase-config.js?v=202610080040";
+import { app } from "./app.js?v=202610080046";
+import { appCheckSiteKey } from "./firebase-config.js?v=202610080046";
 
 const SDK = "https://www.gstatic.com/firebasejs/12.19.0/";
 const MODEL = "gemini-3.5-flash-lite";
@@ -86,6 +86,19 @@ export function simpleElf(text, lang){
   return pick(OPEN[lang] || OPEN.en) + s + pick(CLOSE[lang] || CLOSE.en);
 }
 
+// A plain-language reason the AI couldn't be used, so setup problems are easy to spot.
+function reasonFor(e){
+  const m = String((e && (e.code || "")) + " " + (e && e.message || e) + " " + JSON.stringify((e && e.customErrorData) || {})).toLowerCase();
+  if (m.includes("timeout")) return "it took too long to answer";
+  if (m.includes("app-check") || m.includes("app check") || m.includes("appcheck")) return "App Check isn't finished (register the reCAPTCHA secret key in Firebase App Check)";
+  if (m.includes("service_disabled") || m.includes("has not been used") || m.includes("is disabled") || m.includes("api-not-enabled")) return "Firebase AI Logic isn't turned on yet (AI Services > AI Logic > Get started)";
+  if (m.includes("api_key_service_blocked") || m.includes("are blocked")) return "the website's Firebase key isn't allowed to use AI Logic";
+  if (m.includes("not found") || m.includes("404")) return "the AI model isn't available to this project";
+  if (m.includes("429") || m.includes("quota") || m.includes("resource_exhausted")) return "the free AI limit was reached for now";
+  if (m.includes("failed to fetch") || m.includes("network")) return "no connection to the AI";
+  return (e && (e.code || e.message) || "unknown").toString().slice(0, 140);
+}
+
 // Turn what someone typed into what their elf says. Names never leave this device.
 export async function elfify(text, names){
   const lang = hasHangul(text) ? "ko" : "en";
@@ -99,6 +112,7 @@ export async function elfify(text, names){
     out = maskNames(out, names);   // in case a name slipped back in
     return { text: bleep(out, lang).slice(0, MAX_LEN), ai: true };
   } catch (e) {
-    return { text: bleep(simpleElf(masked, lang), lang).slice(0, MAX_LEN), ai: false };
+    console.warn("Elf translator:", e);
+    return { text: bleep(simpleElf(masked, lang), lang).slice(0, MAX_LEN), ai: false, reason: reasonFor(e) };
   }
 }
