@@ -480,5 +480,6 @@ export default {
   "Elf-ifying…": "엘프 말투로 바꾸는 중…",
   "The elf translator is napping, so a simpler elf filter was used. Check it still says what you meant.": "엘프 번역가가 낮잠 중이라 간단한 엘프 필터를 썼어요. 하려던 말이 맞는지 확인해 주세요.",
   "Messages are rewritten by Google's Gemini AI, so skip private details like addresses or phone numbers.": "메시지는 Google Gemini AI가 바꿔 써요. 주소나 전화번호 같은 개인 정보는 쓰지 마세요.",
-  "No messages yet. Ask them anything. They'll only ever see an elf, and your words get an elf makeover before they're sent.": "아직 메시지가 없어요. 무엇이든 물어보세요. 상대에게는 엘프로만 보이고, 내 말은 보내기 전에 엘프 말투로 바뀌어요."
+  "No messages yet. Ask them anything. They'll only ever see an elf, and your words get an elf makeover before they're sent.": "아직 메시지가 없어요. 무엇이든 물어보세요. 상대에게는 엘프로만 보이고, 내 말은 보내기 전에 엘프 말투로 바뀌어요.",
+  "Names are bleeped and your words get an elf makeover. Check it still says what you meant.": "이름은 삐- 처리되고 말투는 엘프처럼 바뀌어요. 하려던 말이 맞는지 확인해 주세요."
 };
