@@ -39,7 +39,7 @@
       <li><b>Group details</b> the organizer sets: the group name, date, spending limit, currency and an optional group photo.</li>
       <li><b>Your Google account email and a sign-in ID</b>, only if you sign in with Google (required for organizers, optional for everyone else).</li>
       <li><b>Who is matched with whom</b> after names are drawn.</li>
-      <li><b>Secret chat messages</b> you send to the person you're buying for or to your own Secret Santa, with the time they were sent. A message records only whether the Santa or the receiver wrote it, not who.</li>
+      <li><b>Secret chat messages</b> you send to the person you're buying for or to your own Secret Santa, with the time they were sent. A message records only whether the Santa or the receiver wrote it, not who, and only its elf-speak version is kept.</li>
     </ul>
     <p>Your device also keeps your personal links, your language choice and a copy of group details so the app opens quickly. That stays on your device.</p>
   </section>
@@ -61,6 +61,7 @@
       <li><b>Google Firebase</b> stores group information and handles Google sign-in.</li>
       <li><b>GitHub Pages</b> hosts the website.</li>
       <li><b>Google Fonts</b> provides the fonts the site uses.</li>
+      <li><b>Google Gemini (through Firebase AI Logic)</b> rewrites secret chat messages in elf-speak so nobody can tell who wrote them. Before a message is sent to it, the names of everyone in the group are removed on your device. We use Google's free tier, under which Google may use the text it receives to improve its products and human reviewers may read it, so please don't put private details like addresses or phone numbers in chats. Only the elf version of a message is stored.</li>
       <li><b>The US Census Bureau address service</b> checks US mailing addresses. When you tap "Check and save," the street, city, state and ZIP code you typed are sent to it. Your name is not sent.</li>
     </ul>
     <p>These services may receive your device's IP address when they deliver their part of the site, as is normal for websites.</p>

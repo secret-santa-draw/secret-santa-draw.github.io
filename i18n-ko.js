@@ -472,5 +472,13 @@ export default {
   "You have changes that aren't saved yet.": "아직 저장하지 않은 변경 사항이 있어요.",
   "Couldn't save just now. Check your connection and tap Apply changes again.": "지금은 저장하지 못했어요. 인터넷 연결을 확인하고 다시 저장을 눌러 주세요.",
   "Tap Apply changes to save.": "변경 사항 저장을 눌러야 저장돼요.",
-  "Only the person who draws your name sees this.": "내 이름을 뽑은 사람만 볼 수 있어요."
+  "Only the person who draws your name sees this.": "내 이름을 뽑은 사람만 볼 수 있어요.",
+  "Ask about sizes and favorites without giving anything away. Everyone shows up as an elf, and every message is rewritten in elf-speak with names bleeped out, so nobody can tell who's writing.": "정체를 숨긴 채 사이즈나 좋아하는 것을 물어보세요. 모두 엘프로 보이고, 모든 메시지는 엘프 말투로 바뀌며 이름은 삐- 처리돼서 누가 쓴 건지 알 수 없어요.",
+  "Your elf will say": "엘프가 이렇게 말할 거예요",
+  "Try again": "다시 바꾸기",
+  "Edit": "수정",
+  "Elf-ifying…": "엘프 말투로 바꾸는 중…",
+  "The elf translator is napping, so a simpler elf filter was used. Check it still says what you meant.": "엘프 번역가가 낮잠 중이라 간단한 엘프 필터를 썼어요. 하려던 말이 맞는지 확인해 주세요.",
+  "Messages are rewritten by Google's Gemini AI, so skip private details like addresses or phone numbers.": "메시지는 Google Gemini AI가 바꿔 써요. 주소나 전화번호 같은 개인 정보는 쓰지 마세요.",
+  "No messages yet. Ask them anything. They'll only ever see an elf, and your words get an elf makeover before they're sent.": "아직 메시지가 없어요. 무엇이든 물어보세요. 상대에게는 엘프로만 보이고, 내 말은 보내기 전에 엘프 말투로 바뀌어요."
 };
