@@ -58,12 +58,31 @@ const WORD_MAP = new Map(WORDS.map(([a, b]) => [a.toLowerCase(), b]));
 const KEEP_CAPS = new Set(["LEGO", "IKEA", "NASA", "NIKE", "USA", "NYC", "LA", "UK", "NFL", "NBA", "MLB", "NHL", "DVD", "XXL", "XXXL", "ASAP", "DIY", "BTS", "PS5", "TV", "KPOP", "UGG", "UGGS", "HBO", "CD", "ID", "USB", "LED", "PJS", "IPAD", "XL", "XS"]);
 const GREETING = /^(?:h+i+|h+e+y+a*|hello+|hiya|howdy|yo+|sup|wassup|whats up|good (?:morning|afternoon|evening))\b[\s,!.]*/i;
 const THANKS = /\b(?:thanks+|thank u|thank ya|thank you+)\b(?: so much| a lot| a bunch)?/gi;
+// A sprinkle of cheer: one small elf touch per message, picked at random (so it says nothing
+// about who wrote it) and chosen to fit what kind of message it is.
+const CHEER = {
+  en: { hello: ["Hello hello!", "Ho ho hello!", "Hi hi from the North Pole!"],
+        ask: ["Ooh, ", "Elf question: ", "Ooh ooh, "],
+        laugh: [" Tee-hee!", " Hee hee!"],
+        thanks: [" You're the best!", " Yay!"],
+        end: [" ✨", " 🎄", " ❄️", " 🎁", " ✨🎄"] },
+  ko: { hello: ["안녕안녕!", "북극에서 인사해요!"],
+        ask: ["궁금해요! ", "엘프의 질문! "],
+        laugh: [" 히히!", " 헤헤!"],
+        thanks: [" 최고예요!", " 야호!"],
+        end: [" ✨", " 🎄", " ❄️", " 🎁", " ✨🎄"] }
+};
+const pick = a => a[Math.floor(Math.random() * a.length)];
 export function simpleElf(text, lang){
+  const C = CHEER[lang === "ko" ? "ko" : "en"];
   let s = String(text).replace(/\p{Extended_Pictographic}|️|‍/gu, " ").replace(EMOTICON, "$1 ");
+  let laughed = false, greeted = false;
   if (lang === "ko") {
+    laughed = /[ㅋㅎ]{2,}/.test(s);
+    if (/^\s*(?:안녕(?:하세요)?|하이|ㅎㅇ)[\s!~.]*/.test(s)) { greeted = true; s = s.replace(/^\s*(?:안녕(?:하세요)?|하이|ㅎㅇ)[\s!~.]*/, ""); }
     s = s.replace(/[ㅋㅎ]{2,}|[ㅠㅜ]{1,}|ㄷㄷ+|ㅇㅇ|ㄴㄴ/g, " ").replace(/~+/g, "!");
   } else {
-    if (!s.replace(LAUGH_EN, "").replace(/[\s.!?,]/g, "")) return "Tee-hee! ✨";            // just a laugh
+    laughed = LAUGH_EN.test(s); LAUGH_EN.lastIndex = 0;
     s = s.replace(LAUGH_EN, " ");
     s = s.replace(/\bu\s+r\b/gi, "you are").replace(/\bur\b(?=\s+(?:going|gonna|welcome|so|the|right|a|an|very|too|not|such|always|never|probably|definitely|\w+ing)\b)/gi, "you're");
     s = s.replace(/(\p{L})\1{2,}/gu, "$1$1");                                   // "sooooo" -> "soo"
@@ -72,17 +91,27 @@ export function simpleElf(text, lang){
     // Shouted words calm down (known all-caps names like LEGO stay).
     s = s.replace(/\b[A-Z]{3,}\b/g, w => KEEP_CAPS.has(w) ? w : w.toLowerCase())
          .replace(/\b(?:SO|NO|MY|ME|BE|DO|GO|IN|IT|IS|OF|ON|TO|UP|AT|OR|AN|AM|WE|HE)\b/g, w => w.toLowerCase());
-    s = s.replace(GREETING, "Hello! ").replace(THANKS, "thank you");
+    if (GREETING.test(s)) { greeted = true; s = s.replace(GREETING, ""); }
+    s = s.replace(THANKS, "thank you");
     s = s.replace(/\bi\b/g, "I").replace(/\boh my\b(?=\s+\w)/gi, "oh my,").replace(/^(yes|no|okay)\s+(?=\w)/i, "$1, ");
   }
   s = s.replace(/\s+/g, " ").trim()
        .replace(/\.{2,}|…/g, ".").replace(/[?!]*\?[?!]*/g, "?").replace(/!+/g, "!").replace(/,{2,}/g, ",")
        .replace(/\s+([,.!?])/g, "$1").replace(/([,.!?])(?=[^\s,.!?\])])/gu, "$1 ").replace(/^[,.!?\s]+/, "");
   if (lang !== "ko") s = s.replace(/(^|[.!?]\s+)(\p{Ll})/gu, (m, a, b) => a + b.toUpperCase());
-  if (!s) return lang === "ko" ? "히히! ✨" : "Tee-hee! ✨";
-  // A question without a question mark gets one.
+  // Nothing left but a laugh or a hello.
+  if (!s) return (greeted ? pick(C.hello) : lang === "ko" ? "히히!" : "Tee-hee!") + pick(C.end);
+  // A question without a question mark gets one; a plain statement gets an excited "!".
   if (!/[.!?]$/.test(s)) s += (lang !== "ko" && /(?:^|[.!?]\s+)(?:what|who|whom|whose|where|when|why|how|which|do|does|did|is|are|am|was|were|can|could|would|will|should|shall|have|has|any)\b[^.!?]*$/i.test(s)) ? "?" : "!";
-  return s + " ✨";
+  s = s.replace(/\.$/, "!");
+  // One touch of cheer, fitted to the message.
+  const oneSentence = !/[.!?]\s/.test(s);
+  const isQuestion = oneSentence && /\?$/.test(s), isThanks = oneSentence && (lang === "ko" ? /고마워|감사/.test(s) : /^thank you\b/i.test(s));
+  if (greeted) s = pick(C.hello) + " " + s;
+  else if (isQuestion && Math.random() < 0.7) s = pick(C.ask) + (lang === "ko" || /^\[NAME\]|^I\b|^LEGO/.test(s) ? s : s.charAt(0).toLowerCase() + s.slice(1));
+  if (laughed) s += pick(C.laugh);
+  else if (isThanks) s += pick(C.thanks);
+  return s + pick(C.end);
 }
 
 // Turn what someone typed into what their elf says.
