@@ -2,10 +2,10 @@
 // (the Secret Santa) and the person receiving it. A conversation lives under the receiver's
 // wishlist id, which only the two of them (and the organizer) know. Messages record only
 // which side wrote them ("santa" or "giftee"), never who, so the Santa stays anonymous.
-import { db, el } from "./app.js?v=202610080156";
+import { db, el } from "./app.js?v=202610080222";
 import { collection, doc, getDoc, getDocs, onSnapshot, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-import { t, locale } from "./i18n.js?v=202610080156";
-import { elfLook, elfName, elfAvatar } from "./elves.js?v=202610080156";
+import { t, locale } from "./i18n.js?v=202610080222";
+import { elfLook, elfName, elfAvatar } from "./elves.js?v=202610080222";
 
 export const MAX_LEN = 1000;
 const msgsRef = (gid, wishId) => collection(db, "groups", gid, "chats", wishId, "messages");

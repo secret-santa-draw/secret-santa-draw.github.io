@@ -65,12 +65,17 @@ const CHEER = {
         ask: ["Ooh, ", "Elf question: ", "Ooh ooh, "],
         laugh: [" Tee-hee!", " Hee hee!"],
         thanks: [" You're the best!", " Yay!"],
-        end: [" ✨", " 🎄", " ❄️", " 🎁", " ✨🎄"] },
+        // Fun elf phrases, sprinkled in at random: at the start, between sentences, or at the end.
+        start: ["Jingle jingle! ", "Oh, sugarplums! ", "Twinkle twinkle! ", "Hooray for elf mail! ", "Ooh, tinsel and twinkles! "],
+        middle: ["Holly jolly!", "Jingle all the way!", "Ooh, how merry!", "Sprinkles and snowflakes!"],
+        end: [" Jingle all the way!", " Holly jolly!", " Merry, merry!", " Back to the workshop I go!", " Sprinkles and snowflakes!"] },
   ko: { hello: ["안녕안녕!", "북극에서 인사해요!"],
         ask: ["궁금해요! ", "엘프의 질문! "],
         laugh: [" 히히!", " 헤헤!"],
         thanks: [" 최고예요!", " 야호!"],
-        end: [" ✨", " 🎄", " ❄️", " 🎁", " ✨🎄"] }
+        start: ["징글징글! ", "반짝반짝! ", "와아, 신나요! ", "엘프 편지 도착! "],
+        middle: ["메리메리!", "신난다!", "반짝반짝!"],
+        end: [" 메리메리!", " 루돌프도 신났어요!", " 이제 작업장으로 돌아갈게요!", " 눈송이처럼 반짝!"] }
 };
 const pick = a => a[Math.floor(Math.random() * a.length)];
 export function simpleElf(text, lang){
@@ -100,17 +105,31 @@ export function simpleElf(text, lang){
        .replace(/\s+([,.!?])/g, "$1").replace(/([,.!?])(?=[^\s,.!?\])])/gu, "$1 ").replace(/^[,.!?\s]+/, "");
   if (lang !== "ko") s = s.replace(/(^|[.!?]\s+)(\p{Ll})/gu, (m, a, b) => a + b.toUpperCase());
   // Nothing left but a laugh or a hello.
-  if (!s) return (greeted ? pick(C.hello) : lang === "ko" ? "히히!" : "Tee-hee!") + pick(C.end);
+  if (!s) return greeted ? pick(C.hello) : lang === "ko" ? "히히!" : "Tee-hee!";
   // A question without a question mark gets one; a plain statement gets an excited "!".
   if (!/[.!?]$/.test(s)) s += (lang !== "ko" && /(?:^|[.!?]\s+)(?:what|who|whom|whose|where|when|why|how|which|do|does|did|is|are|am|was|were|can|could|would|will|should|shall|have|has|any)\b[^.!?]*$/i.test(s)) ? "?" : "!";
   s = s.replace(/\.$/, "!");
   // One touch of cheer, fitted to the message.
   const oneSentence = !/[.!?]\s/.test(s);
   const isQuestion = oneSentence && /\?$/.test(s), isThanks = oneSentence && (lang === "ko" ? /고마워|감사/.test(s) : /^thank you\b/i.test(s));
+  const sad = lang === "ko" ? /미안|죄송|못 가|못가|아파|슬퍼|안타깝/.test(s) : /\b(?:sorry|can't|cannot|won't|unfortunately|sad|sick|ill|bad news|passed away|miss you|lost)\b/i.test(s);
+  const asks = !greeted && isQuestion && Math.random() < 0.6;
+  const touched = greeted || asks || laughed || isThanks;
+  // Sometimes a fun elf phrase too: less often when there's already a touch, never at the start
+  // when the message already opens with one, and never on sad news.
+  if (!sad && Math.random() < (touched ? 0.3 : 0.6)) s = sprinkle(s, C, !(greeted || asks));
   if (greeted) s = pick(C.hello) + " " + s;
-  else if (isQuestion && Math.random() < 0.7) s = pick(C.ask) + (lang === "ko" || /^\[NAME\]|^I\b|^LEGO/.test(s) ? s : s.charAt(0).toLowerCase() + s.slice(1));
+  else if (asks) s = pick(C.ask) + (lang === "ko" || /^\[NAME\]|^I\b|^[A-Z]{2,}\b/.test(s) ? s : s.charAt(0).toLowerCase() + s.slice(1));
   if (laughed) s += pick(C.laugh);
   else if (isThanks) s += pick(C.thanks);
+  return s;
+}
+// Put one elf phrase at the start, between two sentences, or at the end.
+function sprinkle(s, C, startOk){
+  const breaks = [...s.matchAll(/[.!?]\s+(?=\S)/g)].map(m => m.index + m[0].length);
+  const r = Math.random();
+  if (breaks.length && r < 0.4) { const at = pick(breaks); return s.slice(0, at) + pick(C.middle) + " " + s.slice(at); }
+  if (startOk && r < 0.65 && !/^\[NAME\]/.test(s)) return pick(C.start) + s;
   return s + pick(C.end);
 }
 
