@@ -1,6 +1,14 @@
-// Elf-speak: before a secret chat message is sent, names are bleeped out and the message is
-// run through an elf filter on this device, which irons out texting habits and adds elf flourishes.
-// Nothing is sent anywhere else, and the original words are never stored.
+// Elf-speak: before a secret chat message is sent, names are bleeped out on this device. Then the
+// message is rewritten in the voice of the sender's elf (with the personality they set for that chat)
+// by an AI relay, or by the built-in elf filter if the relay isn't set up or can't be reached.
+// The original words are never stored.
+import { elfRelayUrl } from "./elf-config.js?v=202610080301";
+
+// ---------- Elf personality ----------
+// Each trait goes from 0 to 4. 2 is the well-rounded middle.
+export const TRAITS = ["excitement", "sweetness", "silliness", "mischief", "naughty"];
+export const WELL_ROUNDED = { excitement: 2, sweetness: 2, silliness: 2, mischief: 2, naughty: 2 };
+export const cleanTraits = t => Object.fromEntries(TRAITS.map(k => { const n = Math.round(Number(t && t[k])); return [k, Number.isFinite(n) ? Math.min(4, Math.max(0, n)) : 2]; }));
 export const MAX_LEN = 1000;
 
 // ---------- Bleeping names ----------
@@ -68,17 +76,27 @@ const CHEER = {
         // Fun elf phrases, sprinkled in at random: at the start, between sentences, or at the end.
         start: ["Jingle jingle! ", "Oh, sugarplums! ", "Twinkle twinkle! ", "Hooray for elf mail! ", "Ooh, tinsel and twinkles! "],
         middle: ["Holly jolly!", "Jingle all the way!", "Ooh, how merry!", "Sprinkles and snowflakes!"],
-        end: [" Jingle all the way!", " Holly jolly!", " Merry, merry!", " Back to the workshop I go!", " Sprinkles and snowflakes!"] },
+        end: [" Jingle all the way!", " Holly jolly!", " Merry, merry!", " Back to the workshop I go!", " Sprinkles and snowflakes!"],
+        // Extra phrases that show up more as each personality slider goes up.
+        sweetness: { start: ["Aww! ", "Oh, you sweet sugarplum! "], end: [" Sending sparkly hugs!", " Warmest elf wishes!", " You're a true gem!"] },
+        silliness: { start: ["Fa-la-la-llama! ", "Elf-tastic! "], end: [" Yule be glad I asked!", " Tinsel-tastic!", " Snow much fun!"] },
+        mischief:  { start: ["Psst! ", "Shh, it's a secret! "], end: [" No peeking!", " Wink wink!", " Tee-hee, my lips are sealed!"] },
+        naughty:   { start: ["Hmph, fine! ", "*Dramatic elf sigh* "], end: [" Now back to wrapping duty, ugh!", " Don't tell Santa I said that!", " Hmph!"] } },
   ko: { hello: ["안녕안녕!", "북극에서 인사해요!"],
         ask: ["궁금해요! ", "엘프의 질문! "],
         laugh: [" 히히!", " 헤헤!"],
         thanks: [" 최고예요!", " 야호!"],
         start: ["징글징글! ", "반짝반짝! ", "와아, 신나요! ", "엘프 편지 도착! "],
         middle: ["메리메리!", "신난다!", "반짝반짝!"],
-        end: [" 메리메리!", " 루돌프도 신났어요!", " 이제 작업장으로 돌아갈게요!", " 눈송이처럼 반짝!"] }
+        end: [" 메리메리!", " 루돌프도 신났어요!", " 이제 작업장으로 돌아갈게요!", " 눈송이처럼 반짝!"],
+        sweetness: { start: ["어머나! ", "다정한 엘프가 왔어요! "], end: [" 반짝반짝 포옹을 보내요!", " 따뜻한 엘프 인사를 담아!"] },
+        silliness: { start: ["룰루랄라! ", "엘프-타스틱! "], end: [" 눈사람도 웃겠어요!", " 깔깔깔!"] },
+        mischief:  { start: ["쉿! ", "비밀인데요! "], end: [" 엿보기 금지!", " 찡긋!"] },
+        naughty:   { start: ["흥, 알겠어요! ", "*엘프의 한숨* "], end: [" 이제 포장하러 가야 해요, 에휴!", " 산타한테는 비밀이에요!"] } }
 };
 const pick = a => a[Math.floor(Math.random() * a.length)];
-export function simpleElf(text, lang){
+export function simpleElf(text, lang, traits){
+  const T = cleanTraits(traits);
   const C = CHEER[lang === "ko" ? "ko" : "en"];
   let s = String(text).replace(/\p{Extended_Pictographic}|️|‍/gu, " ").replace(EMOTICON, "$1 ");
   let laughed = false, greeted = false;
@@ -108,7 +126,7 @@ export function simpleElf(text, lang){
   if (!s) return greeted ? pick(C.hello) : lang === "ko" ? "히히!" : "Tee-hee!";
   // A question without a question mark gets one; a plain statement gets an excited "!".
   if (!/[.!?]$/.test(s)) s += (lang !== "ko" && /(?:^|[.!?]\s+)(?:what|who|whom|whose|where|when|why|how|which|do|does|did|is|are|am|was|were|can|could|would|will|should|shall|have|has|any)\b[^.!?]*$/i.test(s)) ? "?" : "!";
-  s = s.replace(/\.$/, "!");
+  if (T.excitement > 0) s = s.replace(/\.$/, "!");
   // One touch of cheer, fitted to the message.
   const oneSentence = !/[.!?]\s/.test(s);
   const isQuestion = oneSentence && /\?$/.test(s), isThanks = oneSentence && (lang === "ko" ? /고마워|감사/.test(s) : /^thank you\b/i.test(s));
@@ -117,26 +135,54 @@ export function simpleElf(text, lang){
   const touched = greeted || asks || laughed || isThanks;
   // Sometimes a fun elf phrase too: less often when there's already a touch, never at the start
   // when the message already opens with one, and never on sad news.
-  if (!sad && Math.random() < (touched ? 0.3 : 0.6)) s = sprinkle(s, C, !(greeted || asks));
+  if (!sad && Math.random() < (touched ? 0.08 + 0.07 * T.excitement : 0.15 + 0.15 * T.excitement)) s = sprinkle(s, C, !(greeted || asks), T);
   if (greeted) s = pick(C.hello) + " " + s;
   else if (asks) s = pick(C.ask) + (lang === "ko" || /^\[NAME\]|^I\b|^[A-Z]{2,}\b/.test(s) ? s : s.charAt(0).toLowerCase() + s.slice(1));
   if (laughed) s += pick(C.laugh);
   else if (isThanks) s += pick(C.thanks);
   return s;
 }
-// Put one elf phrase at the start, between two sentences, or at the end.
-function sprinkle(s, C, startOk){
+// Put one elf phrase at the start, between two sentences, or at the end. Personality sliders
+// make their kind of phrase more likely (festive phrases always have a chance).
+function sprinkle(s, C, startOk, T){
+  const kinds = [["festive", 2], ...TRAITS.filter(k => k !== "excitement").map(k => [k, T[k] > 2 ? (T[k] - 2) * 2 : 0])];
+  let r = Math.random() * kinds.reduce((a, [, w]) => a + w, 0), kind = "festive";
+  for (const [k, w] of kinds) { if (r < w) { kind = k; break; } r -= w; }
+  const pool = kind === "festive" ? { start: C.start, end: C.end, middle: C.middle } : C[kind];
   const breaks = [...s.matchAll(/[.!?]\s+(?=\S)/g)].map(m => m.index + m[0].length);
-  const r = Math.random();
-  if (breaks.length && r < 0.4) { const at = pick(breaks); return s.slice(0, at) + pick(C.middle) + " " + s.slice(at); }
-  if (startOk && r < 0.65 && !/^\[NAME\]/.test(s)) return pick(C.start) + s;
-  return s + pick(C.end);
+  const x = Math.random();
+  if (pool.middle && breaks.length && x < 0.4) { const at = pick(breaks); return s.slice(0, at) + pick(pool.middle) + " " + s.slice(at); }
+  if (startOk && x < 0.65 && !/^\[NAME\]/.test(s)) return pick(pool.start) + s;
+  return s + pick(pool.end);
 }
 
+// Ask the AI relay. Names were already removed on this device.
+async function relay(masked, lang, traits){
+  const ctl = new AbortController(); const timer = setTimeout(() => ctl.abort(), 15000);
+  try {
+    const r = await fetch(elfRelayUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: masked, lang, traits }), signal: ctl.signal });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.text) throw new Error(j.error || ("HTTP " + r.status));
+    return String(j.text);
+  } finally { clearTimeout(timer); }
+}
+const reasonFor = e => /abort/i.test(String(e && e.name) + String(e && e.message)) ? "it took too long to answer"
+  : /failed to fetch|network|load failed/i.test(String(e && e.message)) ? "couldn't reach the elf relay"
+  : String((e && e.message) || e).slice(0, 200);
+
 // Turn what someone typed into what their elf says.
-export async function elfify(text, names){
-  const lang = hasHangul(text) ? "ko" : "en";
+export async function elfify(text, names, traits){
+  const lang = hasHangul(text) ? "ko" : "en", T = cleanTraits(traits);
   const masked = maskNames(text, names).trim().slice(0, MAX_LEN);
   if (!masked) return { text: "" };
-  return { text: bleep(simpleElf(masked, lang), lang).slice(0, MAX_LEN) };
+  if (elfRelayUrl) {
+    try {
+      const out = maskNames(await relay(masked, lang, T), names);   // in case a name slipped back in
+      return { text: bleep(out, lang).slice(0, MAX_LEN), ai: true };
+    } catch (e) {
+      console.warn("Elf relay:", e);
+      return { text: bleep(simpleElf(masked, lang, T), lang).slice(0, MAX_LEN), ai: false, reason: reasonFor(e) };
+    }
+  }
+  return { text: bleep(simpleElf(masked, lang, T), lang).slice(0, MAX_LEN), ai: false };
 }

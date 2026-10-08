@@ -315,3 +315,13 @@ body.sheetopen{overflow:hidden}
 .elfprevrow .bubble{max-width:100%;background:var(--paper)}
 .elfpreview .hint{font-size:.8rem;margin:0}
 .namebleep{display:inline-block;padding:0 7px;margin:0 1px;border-radius:999px;background:var(--gold);color:#1d1606;font-size:.85em;font-weight:700;line-height:1.5;white-space:nowrap}
+.voicebtn{display:inline-flex;align-items:center;gap:6px;margin-left:auto;flex:none;border-radius:999px;padding:6px 12px}
+.voicebtn.custom{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 16%,transparent)}
+.voicepanel{display:flex;flex-direction:column;gap:10px;background:var(--soft);border-radius:14px;padding:12px;max-height:min(62dvh,560px);overflow-y:auto}
+.voicesliders{display:flex;flex-direction:column;gap:8px}
+.voicerow{display:grid;grid-template-columns:92px 1fr;column-gap:10px;align-items:center}
+.voicerow .voiceends{grid-column:2}
+.voicelabel{font-weight:700;font-size:.9rem}
+.voicerow input[type=range]{width:100%;padding:0;border:none;background:transparent;accent-color:var(--pine)}
+.voiceends{display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted)}
+.voicepanel .hint{font-size:.8rem;margin:0}

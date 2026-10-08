@@ -16,19 +16,19 @@
 <!-- Start downloading all scripts at once instead of one after another -->
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js">
-<link rel="modulepreload" href="./app.js?v=202610080222">
-<link rel="modulepreload" href="./i18n.js?v=202610080222">
-<link rel="modulepreload" href="./santa-loader.js?v=202610080222">
-<link rel="modulepreload" href="./nav.js?v=202610080222">
-<link rel="modulepreload" href="./calendar.js?v=202610080222">
-<link rel="modulepreload" href="./icons.js?v=202610080222">
-<link rel="modulepreload" href="./address.js?v=202610080222">
-<link rel="modulepreload" href="./prompts.js?v=202610080222">
-<link rel="modulepreload" href="./firebase-config.js?v=202610080222">
+<link rel="modulepreload" href="./app.js?v=202610080301">
+<link rel="modulepreload" href="./i18n.js?v=202610080301">
+<link rel="modulepreload" href="./santa-loader.js?v=202610080301">
+<link rel="modulepreload" href="./nav.js?v=202610080301">
+<link rel="modulepreload" href="./calendar.js?v=202610080301">
+<link rel="modulepreload" href="./icons.js?v=202610080301">
+<link rel="modulepreload" href="./address.js?v=202610080301">
+<link rel="modulepreload" href="./prompts.js?v=202610080301">
+<link rel="modulepreload" href="./firebase-config.js?v=202610080301">
 <!-- Fonts load without holding up the page -->
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Jua&family=Figtree:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Jua&family=Figtree:wght@400;500;600;700&display=swap"></noscript>
-<link rel="stylesheet" href="style.css?v=202610080222">
+<link rel="stylesheet" href="style.css?v=202610080301">
 </head>
 <body>
 <div class="wrap">
@@ -206,16 +206,23 @@
       <button type="button" class="ghost chatback" id="chatBack" aria-label="Back to chats"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <span id="chatAvatar" class="chatheadav"></span>
       <div class="chatwho"><b id="chatTitle" translate="no"></b><span class="hint" id="chatSub"></span></div>
+      <button type="button" class="small voicebtn" id="voiceBtn" aria-expanded="false" aria-controls="voicePanel"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M5 4v16M12 4v16M19 4v16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="5" cy="14" r="2.4" fill="var(--paper)" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="8" r="2.4" fill="var(--paper)" stroke="currentColor" stroke-width="2"/><circle cx="19" cy="12" r="2.4" fill="var(--paper)" stroke="currentColor" stroke-width="2"/></svg><span>Elf voice</span></button>
     </div>
     <div class="chatbody" id="chatBody"></div>
     <div class="chatfoot">
       <p class="hint chatnote" id="chatNote"></p>
       <div class="chatstarters" id="chatStarters"></div>
+      <div id="voicePanel" class="voicepanel" hidden>
+        <div class="row spread"><span class="label">Your elf's voice in this chat</span><button type="button" class="small ghost" id="voiceReset">Reset to well-rounded</button></div>
+        <div id="voiceSliders" class="voicesliders"></div>
+        <p class="hint">This only changes how your messages are written. Each chat has its own voice, so a quirky elf can't give you away in your other chats.</p>
+        <div><button type="button" class="small primary" id="voiceDone">Done</button></div>
+      </div>
       <div id="elfPreview" class="elfpreview" hidden>
         <span class="label">Your elf will say</span>
         <div class="elfprevrow"><span id="elfPrevAv"></span><div class="bubble" id="elfPrevText" translate="no"></div></div>
         <p class="hint" id="elfPrevNote"></p>
-        <div class="row"><button type="button" class="primary small" id="elfSend">Send</button><button type="button" class="small ghost" id="elfEdit">Edit</button></div>
+        <div class="row"><button type="button" class="primary small" id="elfSend">Send</button><button type="button" class="small" id="elfRetry">Try again</button><button type="button" class="small ghost" id="elfEdit">Edit</button></div>
       </div>
       <form class="chatcompose" id="chatForm" autocomplete="off">
         <textarea id="chatInput" rows="1" maxlength="1000" placeholder="Write a message…" aria-label="Message"></textarea>
@@ -234,20 +241,20 @@ setTimeout(function(){ if (window.__ssReady) return; var d=document.createElemen
 </script>
 <script type="module">
 import { configured, db, $, el, msg, randomId, fmtDate, personalLink, groupLink, formatMoney, currencyOf, normalizePhone, formatPhone, formatOf, kindOf, kidsOn, homeLink, organizeLink, groupIdFromUrl,
-         localGroups, rememberGroup, dropSecret } from "./app.js?v=202610080222";
+         localGroups, rememberGroup, dropSecret } from "./app.js?v=202610080301";
 import { doc, getDoc, setDoc, deleteDoc, onSnapshot, collection, writeBatch, updateDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-import { showLoading, hideLoading } from "./santa-loader.js?v=202610080222";
-import { babyIcon, normName, firstName, kidRosterId } from "./icons.js?v=202610080222";
-import { US_STATES, checkAddress, lookupUS, sameAddress, exactlySame, labelLines, oneLine } from "./address.js?v=202610080222";
+import { showLoading, hideLoading } from "./santa-loader.js?v=202610080301";
+import { babyIcon, normName, firstName, kidRosterId } from "./icons.js?v=202610080301";
+import { US_STATES, checkAddress, lookupUS, sameAddress, exactlySame, labelLines, oneLine } from "./address.js?v=202610080301";
 window.__ssReady = true;
-import { elfify, BLEEP_RE } from "./elfspeak.js?v=202610080222";
-import { threadsFor, watchThread, sendMessage, lastRead, markRead, unreadIn, msgTime, elfLabel, elfAvatar, STARTERS, MAX_LEN } from "./chat.js?v=202610080222";
-import { wishlistHelpers } from "./prompts.js?v=202610080222";
-import { calendarIcon } from "./calendar.js?v=202610080222";
-import { t, startTranslating } from "./i18n.js?v=202610080222";
+import { elfify, BLEEP_RE, TRAITS, WELL_ROUNDED, cleanTraits } from "./elfspeak.js?v=202610080301";
+import { threadsFor, watchThread, sendMessage, lastRead, markRead, unreadIn, msgTime, elfLabel, elfAvatar, STARTERS, MAX_LEN } from "./chat.js?v=202610080301";
+import { wishlistHelpers } from "./prompts.js?v=202610080301";
+import { calendarIcon } from "./calendar.js?v=202610080301";
+import { t, startTranslating } from "./i18n.js?v=202610080301";
 const tr = t;
 startTranslating();
-import { mountNav } from "./nav.js?v=202610080222";
+import { mountNav } from "./nav.js?v=202610080301";
 mountNav();
 
 const GID = groupIdFromUrl();
@@ -511,7 +518,7 @@ function renderChatList(){
 }
 function openChat(key){
   if (!chat.threads.some(th => th.key === key)) return;
-  hidePreview(); chat.open = key; chat.scrolledFor = null; msg("chatMsg", "", "");
+  hidePreview(); chat.open = key; chat.scrolledFor = null; msg("chatMsg", "", ""); toggleVoice(false);
   $("chatSheet").hidden = false; document.body.classList.add("sheetopen");
   if (!history.state || !history.state.chat) history.pushState({ chat: key }, "");
   renderChatHead(); renderChatBody(); renderChatList();
@@ -529,6 +536,7 @@ $("chatBack").onclick = () => closeChat();
 function openThread(){ return chat.threads.find(th => th.key === chat.open); }
 function renderChatHead(){
   const th = openThread(); if (!th) { closeChat(true); return; }
+  markVoice();
   const v = chatView(th);
   const av = $("chatAvatar"); av.textContent = ""; av.append(elfAvatar(v.other, 40));
   $("chatTitle").textContent = v.title; $("chatSub").textContent = v.sub; $("chatNote").textContent = v.note;
@@ -568,25 +576,71 @@ $("chatInput").addEventListener("input", () => { sizeInput(); msg("chatMsg", "",
 $("chatInput").addEventListener("keydown", e => {
   if (e.key === "Enter" && !e.shiftKey && !e.isComposing && e.keyCode !== 229 && matchMedia("(pointer: fine)").matches) { e.preventDefault(); $("chatForm").requestSubmit(); }
 });
+// ---------- Elf voice (personality sliders, saved per chat on this device) ----------
+const VOICE = {
+  excitement: ["Excitement", "Calm & cozy", "Bouncing off the walls"],
+  sweetness: ["Sweetness", "Matter-of-fact", "Sugary sweet"],
+  silliness: ["Silliness", "Straight-faced", "Puns everywhere"],
+  mischief: ["Mischief", "Well-behaved", "Cheeky & secretive"],
+  naughty: ["Naughty", "Nice list", "Naughty-list sass"]
+};
+const voiceKey = th => "ss-elf-voice:" + GID + ":" + th.key;
+function voiceFor(th){ try { return cleanTraits(JSON.parse(localStorage.getItem(voiceKey(th)) || "null") || WELL_ROUNDED); } catch (e) { return { ...WELL_ROUNDED }; } }
+function saveVoice(th, v){ try { localStorage.setItem(voiceKey(th), JSON.stringify(v)); } catch (e) {} }
+function renderVoice(){
+  const th = openThread(); if (!th) return;
+  const v = voiceFor(th), box = $("voiceSliders"); box.textContent = "";
+  TRAITS.forEach(k => {
+    const [label, low, high] = VOICE[k], id = "voice-" + k;
+    const row = el("div", "voicerow");
+    const lab = el("label", "voicelabel", t(label)); lab.htmlFor = id;
+    const range = el("input"); range.type = "range"; range.min = "0"; range.max = "4"; range.step = "1"; range.value = String(v[k]); range.id = id;
+    range.setAttribute("aria-valuetext", [t(low), t("A little"), t("Balanced"), t("A lot"), t(high)][v[k]]);
+    range.oninput = () => { const nv = voiceFor(th); nv[k] = Number(range.value); saveVoice(th, nv); range.setAttribute("aria-valuetext", [t(low), t("A little"), t("Balanced"), t("A lot"), t(high)][nv[k]]); markVoice(); };
+    const ends = el("div", "voiceends"); ends.append(el("span", null, t(low)), el("span", null, t(high)));
+    row.append(lab, range, ends); box.append(row);
+  });
+  markVoice();
+}
+// The button shows when this chat's elf has a custom voice.
+function markVoice(){
+  const th = openThread(); if (!th) return;
+  const v = voiceFor(th), custom = TRAITS.some(k => v[k] !== WELL_ROUNDED[k]);
+  $("voiceBtn").classList.toggle("custom", custom);
+}
+function toggleVoice(open){
+  const show = open === undefined ? $("voicePanel").hidden : open;
+  if (show) hidePreview();
+  $("voicePanel").hidden = !show; $("voiceBtn").setAttribute("aria-expanded", String(show));
+  // While the sliders are open they get the space; the message box comes back on Done.
+  $("chatForm").hidden = $("chatStarters").hidden = $("chatNote").hidden = show;
+  if (show) renderVoice();
+}
+$("voiceBtn").onclick = () => toggleVoice();
+$("voiceDone").onclick = () => { toggleVoice(false); $("chatInput").focus(); };
+$("voiceReset").onclick = () => { const th = openThread(); if (th) { saveVoice(th, { ...WELL_ROUNDED }); renderVoice(); } };
+
 // Sending: the message is turned into elf-speak (names bleeped) and shown for a final check first.
 // Only the elf version is ever stored.
 const preview = { th: null, original: "", text: "" };
 const myElf = th => th.role === "santa" ? th.elves.santa : th.elves.giftee;
 function hidePreview(){ $("elfPreview").hidden = true; $("chatForm").hidden = false; $("chatStarters").hidden = false; preview.th = null; }
 async function makePreview(th, original){
-  $("chatSend").disabled = $("elfSend").disabled = true;
+  $("chatSend").disabled = $("elfSend").disabled = $("elfRetry").disabled = true; $("elfRetry").textContent = t("Elf-ifying…");
   $("chatSend").textContent = t("Elf-ifying…");
   try {
-    const r = await elfify(original, S.roster.map(x => x.name));
+    const r = await elfify(original, S.roster.map(x => x.name), voiceFor(th));
     if (chat.open !== th.key) return;
     Object.assign(preview, { th, original, text: r.text });
     const av = $("elfPrevAv"); av.textContent = ""; av.append(elfAvatar(myElf(th), 30));
     fillBubble($("elfPrevText"), r.text);
-    $("elfPrevNote").textContent = t("Names are bleeped and your words get an elf makeover. Check it still says what you meant.");
+    $("elfPrevNote").textContent = r.reason ? t("The elf translator is napping, so a simpler elf filter was used. Check it still says what you meant.") + " (" + r.reason + ")"
+      : t("Names are bleeped and your words get an elf makeover. Check it still says what you meant.");
+    $("voicePanel").hidden = true; $("voiceBtn").setAttribute("aria-expanded", "false"); $("chatNote").hidden = false;
     $("chatForm").hidden = true; $("chatStarters").hidden = true; $("elfPreview").hidden = false;
     $("chatBody").scrollTop = $("chatBody").scrollHeight;
   } finally {
-    $("chatSend").disabled = $("elfSend").disabled = false;
+    $("chatSend").disabled = $("elfSend").disabled = $("elfRetry").disabled = false; $("elfRetry").textContent = t("Try again");
     $("chatSend").textContent = t("Send");
   }
 }
@@ -597,6 +651,7 @@ $("chatForm").addEventListener("submit", e => {
   if (text.length > MAX_LEN) { msg("chatMsg", "err", t("That message is too long. Keep it under 1,000 characters.")); return; }
   msg("chatMsg", "", ""); makePreview(th, text);
 });
+$("elfRetry").onclick = () => { if (preview.th) makePreview(preview.th, preview.original); };
 $("elfEdit").onclick = () => { const o = preview.original; hidePreview(); $("chatInput").value = o; sizeInput(); $("chatInput").focus(); };
 $("elfSend").onclick = () => {
   const th = preview.th, text = preview.text; if (!th || !text || chat.open !== th.key) return;
