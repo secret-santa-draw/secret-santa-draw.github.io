@@ -11,4 +11,4 @@ export const firebaseConfig = {
 
 // reCAPTCHA v3 site key for Firebase App Check, which protects the elf-speak AI from misuse.
 // Leave empty until it's set up (the chat then falls back to the built-in elf filter if the AI refuses).
-export const appCheckSiteKey = "";
+export const appCheckSiteKey = "6Lf0o-QtAAAAAFUaZCmnQ5QgaBxxvZr5rLESYA1W";

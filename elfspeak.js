@@ -1,8 +1,8 @@
 // Elf-speak: before a secret chat message is sent, names are bleeped out on this device and
 // the message is rewritten by an AI as a giddy, sweet elf, so nobody can tell who wrote it from
 // their tone, word choice, spelling or grammar. The original words are never stored.
-import { app } from "./app.js?v=202610080031";
-import { appCheckSiteKey } from "./firebase-config.js?v=202610080031";
+import { app } from "./app.js?v=202610080040";
+import { appCheckSiteKey } from "./firebase-config.js?v=202610080040";
 
 const SDK = "https://www.gstatic.com/firebasejs/12.19.0/";
 const MODEL = "gemini-3.5-flash-lite";
