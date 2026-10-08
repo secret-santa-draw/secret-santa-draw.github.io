@@ -38,16 +38,16 @@
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js">
-<link rel="modulepreload" href="./app.js?v=202610051548">
-<link rel="modulepreload" href="./i18n.js?v=202610051548">
-<link rel="modulepreload" href="./santa-loader.js?v=202610051548">
-<link rel="modulepreload" href="./nav.js?v=202610051548">
-<link rel="modulepreload" href="./calendar.js?v=202610051548">
-<link rel="modulepreload" href="./firebase-config.js?v=202610051548">
+<link rel="modulepreload" href="./app.js?v=202610080001">
+<link rel="modulepreload" href="./i18n.js?v=202610080001">
+<link rel="modulepreload" href="./santa-loader.js?v=202610080001">
+<link rel="modulepreload" href="./nav.js?v=202610080001">
+<link rel="modulepreload" href="./calendar.js?v=202610080001">
+<link rel="modulepreload" href="./firebase-config.js?v=202610080001">
 <!-- Fonts load without holding up the page -->
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Jua&family=Figtree:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Jua&family=Figtree:wght@400;500;600;700&display=swap"></noscript>
-<link rel="stylesheet" href="style.css?v=202610051548">
+<link rel="stylesheet" href="style.css?v=202610080001">
 </head>
 <body>
 <div class="wrap">
@@ -123,24 +123,27 @@ setTimeout(function(){ if (window.__ssReady) return; var d=document.createElemen
 <script type="module">
 import { configured, db, auth, loadAuth, $, el, msg, randomId, fmtDate, personalLink, groupLink, organizeLink,
          authReady, signInWithGoogle, signOutNow, signInError, localGroups, rememberGroup, setArchived, forgetGroup, syncAccount, ownedGroups,
-         copyText, canShare, shareInvite, formatMoney, currencyOf } from "./app.js?v=202610051548";
+         copyText, canShare, shareInvite, formatMoney, currencyOf } from "./app.js?v=202610080001";
 import { doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { showLoading, hideLoading } from "./santa-loader.js?v=202610051548";
+import { showLoading, hideLoading } from "./santa-loader.js?v=202610080001";
 window.__ssReady = true;
 const { onAuthStateChanged } = (await loadAuth()) || {};
-import { calendarIcon } from "./calendar.js?v=202610051548";
-import { t, startTranslating } from "./i18n.js?v=202610051548";
+import { watchUnread } from "./chat.js?v=202610080001";
+import { calendarIcon } from "./calendar.js?v=202610080001";
+import { t, startTranslating } from "./i18n.js?v=202610080001";
 startTranslating();
-import { mountNav } from "./nav.js?v=202610051548";
+import { mountNav } from "./nav.js?v=202610080001";
 mountNav();
 
 if (!configured) { const f = $("fatal"); f.textContent = "This site isn't set up yet. Add the Firebase settings to firebase-config.js."; f.hidden = false; throw new Error("not configured"); }
 
+const CHAT_ICON = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M5 5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-7l-4.5 3.5V17H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></svg>';
 const SHARE_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M12 15V4M8 8l4-4 4 4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 11v7.5A1.5 1.5 0 0 0 7.5 20h9a1.5 1.5 0 0 0 1.5-1.5V11" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>';
 const live = {};      // gid -> group document (or null if it no longer exists)
 const subs = {};      // gid -> unsubscribe
 const photos = {};    // gid -> photo data URL
 const photoSubs = {};
+const unread = {}, unreadSubs = {};   // gid -> unread chat messages, and the watchers counting them
 let mine = localGroups();
 
 const active = gid => mine[gid] && !mine[gid].archived;
@@ -149,12 +152,16 @@ function watchGroups(){
     if (subs[gid] || !active(gid)) return;
     subs[gid] = onSnapshot(doc(db, "groups", gid), s => {
       live[gid] = s.exists() ? s.data() : null;
+      // After the draw, count new secret-chat messages for people who joined this group.
+      const wantChat = !!(live[gid] && live[gid].drawn && mine[gid] && mine[gid].secret);
+      if (wantChat && !unreadSubs[gid]) unreadSubs[gid] = watchUnread(gid, mine[gid].secret, n => { unread[gid] = n; render(); });
+      if (!wantChat && unreadSubs[gid]) { unreadSubs[gid](); delete unreadSubs[gid]; delete unread[gid]; }
       if (s.exists() && s.data().ev && s.data().ev !== mine[gid].groupName) rememberGroup(gid, { groupName: s.data().ev });
       render();
     }, () => { live[gid] = null; render(); });
     photoSubs[gid] = onSnapshot(doc(db, "groups", gid, "public", "photo"), s => { photos[gid] = s.exists() ? s.data().data : null; render(); }, () => {});
   });
-  Object.keys(subs).forEach(gid => { if (!active(gid)) { subs[gid](); photoSubs[gid](); delete subs[gid]; delete photoSubs[gid]; delete live[gid]; delete photos[gid]; } });
+  Object.keys(subs).forEach(gid => { if (!active(gid)) { subs[gid](); photoSubs[gid](); if (unreadSubs[gid]) { unreadSubs[gid](); delete unreadSubs[gid]; delete unread[gid]; } delete subs[gid]; delete photoSubs[gid]; delete live[gid]; delete photos[gid]; } });
 }
 
 function render(){
@@ -189,6 +196,11 @@ function render(){
       if (m.organizer) fact("You", "organize");
       if (m.myName) fact("In as", m.myName, true);
       if (facts.childNodes.length) card.append(facts);
+      if (unread[gid] && m.secret) {
+        const a = el("a", "newmsgs"); a.href = personalLink(gid, m.secret).replace("#", "&chat=1#");
+        a.innerHTML = CHAT_ICON; a.append(el("span", null, t(unread[gid] === 1 ? "1 new secret chat message" : "{n} new secret chat messages", { n: unread[gid] })));
+        card.append(a);
+      }
     }
 
     const actions = el("div", "row");

@@ -16,19 +16,19 @@
 <!-- Start downloading all scripts at once instead of one after another -->
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js">
-<link rel="modulepreload" href="./app.js?v=202610051548">
-<link rel="modulepreload" href="./i18n.js?v=202610051548">
-<link rel="modulepreload" href="./santa-loader.js?v=202610051548">
-<link rel="modulepreload" href="./nav.js?v=202610051548">
-<link rel="modulepreload" href="./calendar.js?v=202610051548">
-<link rel="modulepreload" href="./icons.js?v=202610051548">
-<link rel="modulepreload" href="./address.js?v=202610051548">
-<link rel="modulepreload" href="./prompts.js?v=202610051548">
-<link rel="modulepreload" href="./firebase-config.js?v=202610051548">
+<link rel="modulepreload" href="./app.js?v=202610080001">
+<link rel="modulepreload" href="./i18n.js?v=202610080001">
+<link rel="modulepreload" href="./santa-loader.js?v=202610080001">
+<link rel="modulepreload" href="./nav.js?v=202610080001">
+<link rel="modulepreload" href="./calendar.js?v=202610080001">
+<link rel="modulepreload" href="./icons.js?v=202610080001">
+<link rel="modulepreload" href="./address.js?v=202610080001">
+<link rel="modulepreload" href="./prompts.js?v=202610080001">
+<link rel="modulepreload" href="./firebase-config.js?v=202610080001">
 <!-- Fonts load without holding up the page -->
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Jua&family=Figtree:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Jua&family=Figtree:wght@400;500;600;700&display=swap"></noscript>
-<link rel="stylesheet" href="style.css?v=202610051548">
+<link rel="stylesheet" href="style.css?v=202610080001">
 </head>
 <body>
 <div class="wrap">
@@ -53,6 +53,15 @@
         <div class="row" style="margin-top:10px"><button class="ghost" id="hideMatch" type="button">Hide</button></div>
       </div>
       <p id="noMatch" class="hint" hidden>You joined after names were drawn, so you don't have a match. Ask the organizer.</p>
+    </div>
+  </section>
+
+  <!-- Secret chats (after the draw) -->
+  <section id="chatSec" hidden>
+    <h2 class="withbadge">Secret chats <span class="countbadge" id="chatTotal" hidden></span></h2>
+    <div class="panel">
+      <p class="hint">Ask about sizes and favorites without giving anything away. Secret Santas show up as elves, so nobody finds out who's buying for them.</p>
+      <div id="chatList" class="chatlist"></div>
     </div>
   </section>
 
@@ -191,6 +200,26 @@
   <footer class="row"><a href="./">My groups</a><a href="#" id="orgLink" hidden>Organize this group</a></footer>
 </div>
 
+<div id="chatSheet" class="chatsheet" hidden role="dialog" aria-modal="true" aria-labelledby="chatTitle">
+  <div class="chatinner">
+    <div class="chathead">
+      <button type="button" class="ghost chatback" id="chatBack" aria-label="Back to chats"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <span id="chatAvatar" class="chatheadav"></span>
+      <div class="chatwho"><b id="chatTitle" translate="no"></b><span class="hint" id="chatSub"></span></div>
+    </div>
+    <div class="chatbody" id="chatBody"></div>
+    <div class="chatfoot">
+      <p class="hint chatnote" id="chatNote"></p>
+      <div class="chatstarters" id="chatStarters"></div>
+      <form class="chatcompose" id="chatForm" autocomplete="off">
+        <textarea id="chatInput" rows="1" maxlength="1000" placeholder="Write a message…" aria-label="Message"></textarea>
+        <button type="submit" class="primary" id="chatSend">Send</button>
+      </form>
+      <p id="chatMsg" class="msg err" hidden></p>
+    </div>
+  </div>
+</div>
+
 <script>
 // If the page's code doesn't start (for example, an old copy is stuck in the browser), say so instead of sitting silently.
 setTimeout(function(){ if (window.__ssReady) return; var d=document.createElement("div"); d.className="stalled";
@@ -199,18 +228,19 @@ setTimeout(function(){ if (window.__ssReady) return; var d=document.createElemen
 </script>
 <script type="module">
 import { configured, db, $, el, msg, randomId, fmtDate, personalLink, groupLink, formatMoney, currencyOf, normalizePhone, formatPhone, formatOf, kindOf, kidsOn, homeLink, organizeLink, groupIdFromUrl,
-         localGroups, rememberGroup, dropSecret } from "./app.js?v=202610051548";
+         localGroups, rememberGroup, dropSecret } from "./app.js?v=202610080001";
 import { doc, getDoc, setDoc, deleteDoc, onSnapshot, collection, writeBatch, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { showLoading, hideLoading } from "./santa-loader.js?v=202610051548";
-import { babyIcon, normName, firstName, kidRosterId } from "./icons.js?v=202610051548";
-import { US_STATES, checkAddress, lookupUS, sameAddress, exactlySame, labelLines, oneLine } from "./address.js?v=202610051548";
+import { showLoading, hideLoading } from "./santa-loader.js?v=202610080001";
+import { babyIcon, normName, firstName, kidRosterId } from "./icons.js?v=202610080001";
+import { US_STATES, checkAddress, lookupUS, sameAddress, exactlySame, labelLines, oneLine } from "./address.js?v=202610080001";
 window.__ssReady = true;
-import { wishlistHelpers } from "./prompts.js?v=202610051548";
-import { calendarIcon } from "./calendar.js?v=202610051548";
-import { t, startTranslating } from "./i18n.js?v=202610051548";
+import { threadsFor, watchThread, sendMessage, lastRead, markRead, unreadIn, msgTime, elfLabel, elfAvatar, STARTERS, MAX_LEN } from "./chat.js?v=202610080001";
+import { wishlistHelpers } from "./prompts.js?v=202610080001";
+import { calendarIcon } from "./calendar.js?v=202610080001";
+import { t, startTranslating } from "./i18n.js?v=202610080001";
 const tr = t;
 startTranslating();
-import { mountNav } from "./nav.js?v=202610051548";
+import { mountNav } from "./nav.js?v=202610080001";
 mountNav();
 
 const GID = groupIdFromUrl();
@@ -328,6 +358,7 @@ function render(){
   $("peopleHint").textContent = !S.roster.length ? t("Nobody has joined yet. Be the first!") : kids ? t(adults === 1 ? (kids === 1 ? "{a} adult and {k} kid so far." : "{a} adult and {k} kids so far.") : (kids === 1 ? "{a} adults and {k} kid so far." : "{a} adults and {k} kids so far."), { a: adults, k: kids }) : t(adults === 1 ? "{a} adult so far." : "{a} adults so far.", { a: adults });
 
   renderMatch();
+  renderChats();
 }
 
 function renderKids(){
@@ -386,6 +417,123 @@ function renderMatch(){
   });
 }
 
+// ---------- Secret chats ----------
+const chat = { threads: [], msgs: {}, subs: {}, open: null, scrolledFor: null, jumped: false };
+function stopChats(){ Object.values(chat.subs).forEach(u => u()); chat.subs = {}; chat.msgs = {}; chat.threads = []; closeChat(true); }
+const isMine = (th, m) => m.from === th.role;
+// Who's on the other side of a conversation, as this person sees them.
+function chatView(th){
+  if (th.role === "santa") return {
+    other: th.elves.giftee,
+    title: S.revealed ? th.name : t(th.kid ? "The kid you're buying for" : "The person you're buying for"),
+    sub: t("You're their Secret Santa. You appear as {elf}.", { elf: elfLabel(th.elves.santa) }),
+    note: t(th.kid ? "Their parent answers for them. They can't see your name, so don't give yourself away!" : "They can't see your name, so don't give yourself away!"),
+    starters: STARTERS.santa };
+  return {
+    other: th.elves.santa,
+    title: th.forKid ? t("{name}'s Secret Santa", { name: th.name }) : t("Your Secret Santa"),
+    sub: elfLabel(th.elves.santa),
+    note: t(th.forKid ? "You're answering for {name}. Their Secret Santa stays a mystery until the exchange." : "Your Secret Santa knows it's you, but you won't find out who they are until the exchange.", { name: th.name }),
+    starters: STARTERS.giftee };
+}
+function renderChats(){
+  const show = !!(S.game.drawn && S.me && S.match);
+  $("chatSec").hidden = !show;
+  if (!show) { if (chat.threads.length) stopChats(); return; }
+  chat.threads = threadsFor({ me: S.me, kids: S.kids, match: S.match });
+  const keys = new Set(chat.threads.map(th => th.key));
+  Object.keys(chat.subs).forEach(k => { if (!keys.has(k)) { chat.subs[k](); delete chat.subs[k]; delete chat.msgs[k]; } });
+  chat.threads.forEach(th => { if (!chat.subs[th.key]) chat.subs[th.key] = watchThread(GID, th.wishId, msgs => { chat.msgs[th.key] = msgs || []; renderChatList(); if (chat.open === th.key) renderChatBody(); }); });
+  renderChatList();
+  if (chat.open) renderChatHead();
+  // Arriving from a "new message" note on the home page: bring the chats into view.
+  if (!chat.jumped && new URLSearchParams(location.search).get("chat")) { chat.jumped = true; setTimeout(() => $("chatSec").scrollIntoView({ behavior: "smooth", block: "start" }), 300); }
+}
+function renderChatList(){
+  const list = $("chatList"); list.textContent = "";
+  let total = 0;
+  chat.threads.forEach(th => {
+    const v = chatView(th), msgs = chat.msgs[th.key] || [];
+    const unread = chat.open === th.key ? 0 : unreadIn(msgs, th.role, lastRead(GID, th.key)); total += unread;
+    const b = el("button", "chatitem" + (unread ? " unread" : "")); b.type = "button";
+    b.append(elfAvatar(v.other, 44));
+    const txt = el("span", "chatitemtext");
+    const ti = el("b", null, v.title); if (th.role === "santa" && S.revealed) ti.setAttribute("translate", "no"); txt.append(ti);
+    const last = msgs[msgs.length - 1];
+    const pv = el("span", "chatpreview");
+    if (last) { pv.setAttribute("translate", "no"); pv.textContent = (isMine(th, last) ? t("You: ") : "") + last.text.replace(/\s+/g, " "); }
+    else pv.textContent = th.role === "santa" ? t("Say hi and ask what they'd like.") : v.sub;
+    txt.append(pv); b.append(txt);
+    if (unread) b.append(el("span", "countbadge", String(unread)));
+    b.setAttribute("aria-label", v.title + (unread ? ", " + t(unread === 1 ? "1 new message" : "{n} new messages", { n: unread }) : ""));
+    b.onclick = () => openChat(th.key);
+    list.append(b);
+  });
+  $("chatTotal").hidden = !total; $("chatTotal").textContent = String(total);
+}
+function openChat(key){
+  if (!chat.threads.some(th => th.key === key)) return;
+  chat.open = key; chat.scrolledFor = null; msg("chatMsg", "", "");
+  $("chatSheet").hidden = false; document.body.classList.add("sheetopen");
+  if (!history.state || !history.state.chat) history.pushState({ chat: key }, "");
+  renderChatHead(); renderChatBody(); renderChatList();
+  setTimeout(() => $("chatInput").focus({ preventScroll: true }), 50);
+}
+function closeChat(silent){
+  if (!chat.open) return;
+  chat.open = null; $("chatSheet").hidden = true; document.body.classList.remove("sheetopen"); $("chatInput").value = ""; sizeInput();
+  if (!silent && history.state && history.state.chat) history.back();
+  renderChatList();
+}
+window.addEventListener("popstate", () => { if (chat.open) closeChat(true); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && chat.open) closeChat(); });
+$("chatBack").onclick = () => closeChat();
+function openThread(){ return chat.threads.find(th => th.key === chat.open); }
+function renderChatHead(){
+  const th = openThread(); if (!th) { closeChat(true); return; }
+  const v = chatView(th);
+  const av = $("chatAvatar"); av.textContent = ""; av.append(elfAvatar(v.other, 40));
+  $("chatTitle").textContent = v.title; $("chatSub").textContent = v.sub; $("chatNote").textContent = v.note;
+}
+function renderChatBody(){
+  const th = openThread(); if (!th) return;
+  const v = chatView(th), msgs = chat.msgs[th.key] || [], body = $("chatBody");
+  const nearBottom = body.scrollHeight - body.scrollTop - body.clientHeight < 80;
+  body.textContent = "";
+  if (!msgs.length) body.append(el("p", "chatempty", th.role === "santa" ? t("No messages yet. Ask them anything, they'll only ever see an elf.") : t("No messages yet. Say hi to your Secret Santa, or wait for them to reach out.")));
+  msgs.forEach((m, i) => {
+    const mine = isMine(th, m), prev = msgs[i - 1], next = msgs[i + 1];
+    const startRun = !prev || isMine(th, prev) !== mine || m.at - prev.at > 10 * 60000;
+    const endRun = !next || isMine(th, next) !== mine || next.at - m.at > 10 * 60000;
+    const row = el("div", "msgrow " + (mine ? "mine" : "theirs") + (startRun ? " start" : ""));
+    if (!mine) { if (endRun) row.append(elfAvatar(v.other, 30)); else row.append(el("span", "avspace")); }
+    const bub = el("div", "bubble" + (m.pending ? " pending" : "")); bub.setAttribute("translate", "no"); bub.textContent = m.text;
+    row.append(bub); body.append(row);
+    if (endRun) body.append(el("span", "msgtime " + (mine ? "mine" : "theirs"), (m.pending ? t("Sending…") : msgTime(m.at))));
+  });
+  // Starters only while the conversation is empty.
+  const st = $("chatStarters"); st.textContent = "";
+  if (!msgs.length) v.starters.forEach(x => { const c = el("button", "promptchip", x); c.type = "button"; c.onclick = () => { $("chatInput").value = t(x); sizeInput(); $("chatInput").focus(); }; st.append(c); });
+  if (chat.scrolledFor !== th.key || nearBottom) { body.scrollTop = body.scrollHeight; chat.scrolledFor = th.key; }
+  if (msgs.length && document.visibilityState === "visible") markRead(GID, th.key, msgs[msgs.length - 1].at);
+}
+document.addEventListener("visibilitychange", () => { if (chat.open && document.visibilityState === "visible") renderChatBody(); });
+function sizeInput(){ const i = $("chatInput"); i.style.height = "auto"; i.style.height = Math.min(i.scrollHeight, 130) + "px"; }
+$("chatInput").addEventListener("input", () => { sizeInput(); msg("chatMsg", "", ""); });
+// Enter sends on a keyboard (Shift+Enter for a new line). Not while typing Korean or other composed text.
+$("chatInput").addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey && !e.isComposing && e.keyCode !== 229 && matchMedia("(pointer: fine)").matches) { e.preventDefault(); $("chatForm").requestSubmit(); }
+});
+$("chatForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const th = openThread(), text = $("chatInput").value;
+  if (!th || !text.trim()) return;
+  if (text.length > MAX_LEN) { msg("chatMsg", "err", t("That message is too long. Keep it under 1,000 characters.")); return; }
+  // The message shows right away (marked "Sending…") and goes out as soon as there's a connection.
+  $("chatInput").value = ""; sizeInput(); chat.scrolledFor = null; $("chatInput").focus();
+  sendMessage(GID, th.wishId, th.role, text).catch(() => { if (!$("chatInput").value) { $("chatInput").value = text; sizeInput(); } msg("chatMsg", "err", t("Couldn't send that. Check your connection and try again.")); });
+});
+
 // ---------- Subscriptions ----------
 onSnapshot(doc(db, "groups", GID), s => {
   if (!s.exists()) { fatal("This group doesn't exist. It may have been deleted, or the link is incomplete. Check with whoever invited you."); return; }
@@ -398,7 +546,7 @@ onSnapshot(collection(db, "groups", GID, "roster"), s => { S.roster = s.docs.map
 
 let unsubs = [];
 function watchMe(secret){
-  unsubs.forEach(u => u()); unsubs = []; unwatchWishes(); S.kids = []; S.match = undefined; $("kidList").textContent = "";
+  unsubs.forEach(u => u()); unsubs = []; unwatchWishes(); stopChats(); S.kids = []; S.match = undefined; $("kidList").textContent = "";
   S.secret = secret;
   if (!secret) { S.me = null; gotMe = true; render(); return; }
   showLoading("Finding your name on the list…");
@@ -511,8 +659,8 @@ $("copyLink").addEventListener("click", async () => {
   catch (e) { const r = document.createRange(); r.selectNodeContents($("myLink")); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); b.textContent = "Selected. Copy it now"; }
   setTimeout(() => b.textContent = "Copy link", 2000);
 });
-$("revealBtn").addEventListener("click", () => { S.revealed = true; renderMatch(); $("tags").querySelectorAll(".tag").forEach(t => t.classList.add("show")); });
-$("hideMatch").addEventListener("click", () => { S.revealed = false; renderMatch(); });
+$("revealBtn").addEventListener("click", () => { S.revealed = true; renderMatch(); renderChatList(); if (chat.open) renderChatHead(); $("tags").querySelectorAll(".tag").forEach(t => t.classList.add("show")); });
+$("hideMatch").addEventListener("click", () => { S.revealed = false; renderMatch(); renderChatList(); if (chat.open) renderChatHead(); });
 
 // ---------- Mailing address ----------
 $("aState").append(new Option("Choose…", ""));

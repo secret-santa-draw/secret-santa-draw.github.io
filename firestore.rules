@@ -132,6 +132,20 @@ service cloud.firestore {
           && shortText(request.resource.data.name, 40);
       }
 
+      // Secret chats between each person and their Secret Santa, after the draw. A conversation is
+      // filed under the receiver's wishlist id, which only the two of them and the organizer know,
+      // and a message says only which side wrote it ("santa" or "giftee"), never who.
+      match /chats/{wishId}/messages/{msgId} {
+        allow read: if true;
+        allow create: if groupDoc(gid).drawn == true
+          && exists(/databases/$(database)/documents/groups/$(gid)/wishes/$(wishId))
+          && request.resource.data.keys().hasOnly(['from', 'text', 'at'])
+          && request.resource.data.from in ['santa', 'giftee']
+          && shortText(request.resource.data.text, 1000)
+          && request.resource.data.at == request.time;
+        allow delete: if isOwner(gid);
+      }
+
       // Each person's match, keyed by their secret link. Only the organizer writes these.
       match /matches/{secret} {
         allow get: if true;

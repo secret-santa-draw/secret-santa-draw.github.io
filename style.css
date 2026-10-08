@@ -266,3 +266,46 @@ body.org .langpick select{color:var(--band-ink)}
 body.org .langpick select option{color:#173a2f}
 .modebadge{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;background:var(--gold);color:#1d1606;border-radius:999px;padding:4px 12px 4px 10px;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
 .addperson{display:flex;flex-direction:column;gap:10px;border-top:1px dashed var(--line);padding-top:16px}
+
+/* Secret chats */
+.withbadge{display:flex;align-items:center;gap:10px}
+.countbadge{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 7px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-family:var(--body);font-size:.78rem;font-weight:700;line-height:1}
+.elfav{display:inline-flex;flex:none;border-radius:50%;line-height:0}
+.elfav svg{display:block;border-radius:50%}
+.chatlist{display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.chatitem{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:transparent;border:none;border-bottom:1px solid var(--line);border-radius:0;padding:12px 2px;font-weight:400}
+.chatitem:hover{background:color-mix(in srgb,var(--soft) 55%,transparent)}
+.chatitemtext{display:flex;flex-direction:column;min-width:0;flex:1}
+.chatitemtext b{font-weight:700;overflow-wrap:anywhere}
+.chatpreview{color:var(--muted);font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chatitem.unread .chatpreview{color:var(--ink);font-weight:600}
+body.sheetopen{overflow:hidden}
+.chatsheet{position:fixed;inset:0;z-index:80;background:var(--bg);display:flex;justify-content:center;height:100dvh}
+.chatinner{display:flex;flex-direction:column;width:100%;max-width:640px;height:100%;min-height:0}
+.chathead{display:flex;align-items:center;gap:10px;padding:12px 12px 12px 6px;background:var(--paper);border-bottom:1px solid var(--line)}
+.chatback{display:inline-flex;align-items:center;padding:8px;color:var(--ink)}
+.chatwho{display:flex;flex-direction:column;min-width:0}
+.chatwho b{font-size:1.05rem;overflow-wrap:anywhere}
+.chatwho .hint{font-size:.82rem}
+.chatbody{flex:1;min-height:0;overflow-y:auto;padding:16px 14px 8px;display:flex;flex-direction:column;gap:3px;overscroll-behavior:contain}
+.chatempty{margin:auto;text-align:center;color:var(--muted);max-width:30ch;padding:24px 0}
+.msgrow{display:flex;align-items:flex-end;gap:8px;max-width:100%}
+.msgrow.start{margin-top:10px}
+.msgrow.mine{justify-content:flex-end}
+.avspace{width:30px;flex:none}
+.bubble{max-width:min(78%,420px);padding:9px 13px;border-radius:18px;background:var(--paper);border:1px solid var(--line);white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.4}
+.msgrow.theirs .bubble{border-bottom-left-radius:6px}
+.msgrow.mine .bubble{background:var(--pine);border-color:var(--pine);color:#fff;border-bottom-right-radius:6px}
+@media (prefers-color-scheme: dark){.msgrow.mine .bubble{color:#0f1c18}}
+.bubble.pending{opacity:.65}
+.msgtime{font-size:.72rem;color:var(--muted);margin:2px 0 4px}
+.msgtime.mine{align-self:flex-end}
+.msgtime.theirs{margin-left:38px}
+.chatfoot{padding:8px 12px calc(12px + env(safe-area-inset-bottom));background:var(--paper);border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.chatnote{font-size:.8rem;margin:0}
+.chatstarters{display:flex;flex-wrap:wrap;gap:6px}
+.chatstarters:empty{display:none}
+.chatcompose{display:flex;gap:8px;align-items:flex-end}
+.chatcompose textarea{min-height:44px;max-height:130px;resize:none;border-radius:22px;padding:11px 16px;line-height:1.35}
+.chatcompose button{border-radius:22px;flex:none;height:44px}
+.newmsgs{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);font-weight:700;font-size:.9rem;padding:7px 14px;border-radius:999px;text-decoration:none}
