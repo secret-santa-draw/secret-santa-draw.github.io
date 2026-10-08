@@ -465,5 +465,12 @@ export default {
   "1 new secret chat message": "새 비밀 채팅 메시지 1개",
   "{n} new secret chat messages": "새 비밀 채팅 메시지 {n}개",
   "Matches and secret chats erased. Joining is open again and you can draw when ready.": "짝과 비밀 채팅을 지웠어요. 다시 참여할 수 있고, 준비되면 다시 뽑을 수 있어요.",
-  "This erases everyone's match and their secret chats, and reopens joining. Anyone who already looked will get a new person.": "모든 사람의 짝과 비밀 채팅이 지워지고 다시 참여할 수 있게 돼요. 이미 확인한 사람도 새로운 사람을 뽑게 돼요."
+  "This erases everyone's match and their secret chats, and reopens joining. Anyone who already looked will get a new person.": "모든 사람의 짝과 비밀 채팅이 지워지고 다시 참여할 수 있게 돼요. 이미 확인한 사람도 새로운 사람을 뽑게 돼요.",
+  "Apply changes": "변경 사항 저장",
+  "Discard changes": "변경 취소",
+  "Changes discarded.": "변경 사항을 취소했어요.",
+  "You have changes that aren't saved yet.": "아직 저장하지 않은 변경 사항이 있어요.",
+  "Couldn't save just now. Check your connection and tap Apply changes again.": "지금은 저장하지 못했어요. 인터넷 연결을 확인하고 다시 저장을 눌러 주세요.",
+  "Tap Apply changes to save.": "변경 사항 저장을 눌러야 저장돼요.",
+  "Only the person who draws your name sees this.": "내 이름을 뽑은 사람만 볼 수 있어요."
 };

@@ -309,3 +309,4 @@ body.sheetopen{overflow:hidden}
 .chatcompose textarea{min-height:44px;max-height:130px;resize:none;border-radius:22px;padding:11px 16px;line-height:1.35}
 .chatcompose button{border-radius:22px;flex:none;height:44px}
 .newmsgs{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);font-weight:700;font-size:.9rem;padding:7px 14px;border-radius:999px;text-decoration:none}
+.wishactions{gap:8px}

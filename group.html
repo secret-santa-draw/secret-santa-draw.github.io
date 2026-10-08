@@ -16,19 +16,19 @@
 <!-- Start downloading all scripts at once instead of one after another -->
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js">
-<link rel="modulepreload" href="./app.js?v=202610080001">
-<link rel="modulepreload" href="./i18n.js?v=202610080001">
-<link rel="modulepreload" href="./santa-loader.js?v=202610080001">
-<link rel="modulepreload" href="./nav.js?v=202610080001">
-<link rel="modulepreload" href="./calendar.js?v=202610080001">
-<link rel="modulepreload" href="./icons.js?v=202610080001">
-<link rel="modulepreload" href="./address.js?v=202610080001">
-<link rel="modulepreload" href="./prompts.js?v=202610080001">
-<link rel="modulepreload" href="./firebase-config.js?v=202610080001">
+<link rel="modulepreload" href="./app.js?v=202610080016">
+<link rel="modulepreload" href="./i18n.js?v=202610080016">
+<link rel="modulepreload" href="./santa-loader.js?v=202610080016">
+<link rel="modulepreload" href="./nav.js?v=202610080016">
+<link rel="modulepreload" href="./calendar.js?v=202610080016">
+<link rel="modulepreload" href="./icons.js?v=202610080016">
+<link rel="modulepreload" href="./address.js?v=202610080016">
+<link rel="modulepreload" href="./prompts.js?v=202610080016">
+<link rel="modulepreload" href="./firebase-config.js?v=202610080016">
 <!-- Fonts load without holding up the page -->
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Jua&family=Figtree:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Jua&family=Figtree:wght@400;500;600;700&display=swap"></noscript>
-<link rel="stylesheet" href="style.css?v=202610080001">
+<link rel="stylesheet" href="style.css?v=202610080016">
 </head>
 <body>
 <div class="wrap">
@@ -93,7 +93,7 @@
         <label class="label" for="myWish">Gift ideas</label>
         <textarea id="myWish" placeholder="Tap a prompt above, or type anything you'd like…" maxlength="4000"></textarea>
       </div>
-      <p class="hint" id="wishStatus">Only the person who draws your name sees this. It saves as you type.</p>
+      <p class="hint" id="wishStatus">Only the person who draws your name sees this.</p>
       <label class="check" id="volunteerRow"><input type="checkbox" id="volunteer"> I'm happy to buy for a kid too</label>
       <p class="hint" id="volunteerHint">Kids get a gift but don't give one, so a few adults buy a second gift for a kid. Volunteers are picked first.</p>
     </div>
@@ -228,19 +228,19 @@ setTimeout(function(){ if (window.__ssReady) return; var d=document.createElemen
 </script>
 <script type="module">
 import { configured, db, $, el, msg, randomId, fmtDate, personalLink, groupLink, formatMoney, currencyOf, normalizePhone, formatPhone, formatOf, kindOf, kidsOn, homeLink, organizeLink, groupIdFromUrl,
-         localGroups, rememberGroup, dropSecret } from "./app.js?v=202610080001";
+         localGroups, rememberGroup, dropSecret } from "./app.js?v=202610080016";
 import { doc, getDoc, setDoc, deleteDoc, onSnapshot, collection, writeBatch, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { showLoading, hideLoading } from "./santa-loader.js?v=202610080001";
-import { babyIcon, normName, firstName, kidRosterId } from "./icons.js?v=202610080001";
-import { US_STATES, checkAddress, lookupUS, sameAddress, exactlySame, labelLines, oneLine } from "./address.js?v=202610080001";
+import { showLoading, hideLoading } from "./santa-loader.js?v=202610080016";
+import { babyIcon, normName, firstName, kidRosterId } from "./icons.js?v=202610080016";
+import { US_STATES, checkAddress, lookupUS, sameAddress, exactlySame, labelLines, oneLine } from "./address.js?v=202610080016";
 window.__ssReady = true;
-import { threadsFor, watchThread, sendMessage, lastRead, markRead, unreadIn, msgTime, elfLabel, elfAvatar, STARTERS, MAX_LEN } from "./chat.js?v=202610080001";
-import { wishlistHelpers } from "./prompts.js?v=202610080001";
-import { calendarIcon } from "./calendar.js?v=202610080001";
-import { t, startTranslating } from "./i18n.js?v=202610080001";
+import { threadsFor, watchThread, sendMessage, lastRead, markRead, unreadIn, msgTime, elfLabel, elfAvatar, STARTERS, MAX_LEN } from "./chat.js?v=202610080016";
+import { wishlistHelpers } from "./prompts.js?v=202610080016";
+import { calendarIcon } from "./calendar.js?v=202610080016";
+import { t, startTranslating } from "./i18n.js?v=202610080016";
 const tr = t;
 startTranslating();
-import { mountNav } from "./nav.js?v=202610080001";
+import { mountNav } from "./nav.js?v=202610080016";
 mountNav();
 
 const GID = groupIdFromUrl();
@@ -265,20 +265,50 @@ function unwatchWishes(){ Object.keys(wishSubs).forEach(k => { wishSubs[k](); de
 const addrSubs = {};
 function watchAddr(id){ if (!id || addrSubs[id]) return; addrSubs[id] = onSnapshot(doc(db, "groups", GID, "addresses", id), a => { S.addresses[id] = a.exists() ? a.data() : null; render(); }, () => {}); }
 
-// Autosave a wishlist: one write at a time, after a short pause in typing.
-const savers = {};
-function saveWish(id, value, statusEl){
-  const s = savers[id] || (savers[id] = { timer: null, busy: false, next: null });
-  statusEl.textContent = "Saving…"; s.next = value; clearTimeout(s.timer);
-  s.timer = setTimeout(async () => {
-    if (s.busy) return; s.busy = true;
-    while (s.next !== null) { const v = s.next; s.next = null;
-      try { await updateDoc(doc(db, "groups", GID, "wishes", id), { wishlist: v }); statusEl.textContent = "Saved."; }
-      catch (e) { statusEl.textContent = "Couldn't save just now. Check your connection and keep typing to try again."; } }
-    s.busy = false;
-  }, 700);
+// Wishlists save when you tap "Apply changes" (or go back with "Discard changes").
+const drafts = {};   // wishlist id -> { ta, status, idle, bar, apply, saving }
+const savedText = id => ((S.wishes[id] || {}).wishlist) || "";
+// A wishlist has unsaved changes only once the person has edited it (not while it's still loading).
+const isDirty = id => { const d = drafts[id]; return !!d && d.touched && d.ta.value !== savedText(id); };
+function wishEditor(ta, id, statusEl, idleText){
+  const bar = el("div", "row wishactions"); bar.hidden = true;
+  const apply = el("button", "small primary", "Apply changes"); apply.type = "button";
+  const discard = el("button", "small ghost", "Discard changes"); discard.type = "button";
+  bar.append(apply, discard);
+  const d = drafts[id] = { ta, status: statusEl, idle: idleText, bar, apply, saving: false, touched: false };
+  ta.addEventListener("input", () => { d.touched = true; refreshDraft(id); });
+  apply.onclick = () => applyWish(id);
+  discard.onclick = () => { ta.value = savedText(id); ta.dispatchEvent(new Event("input", { bubbles: true })); d.touched = false; refreshDraft(id); statusEl.textContent = t("Changes discarded."); };
+  return bar;
 }
-function syncTextarea(ta, id){ const w = S.wishes[id]; if (w && document.activeElement !== ta && ta.value !== (w.wishlist || "")) ta.value = w.wishlist || ""; }
+function refreshDraft(id){
+  const d = drafts[id]; if (!d || d.saving) return;
+  const dirty = isDirty(id);
+  d.bar.hidden = !dirty;
+  if (dirty) d.status.textContent = t("You have changes that aren't saved yet.");
+  else if (d.status.textContent === t("You have changes that aren't saved yet.")) d.status.textContent = t(d.idle);
+}
+async function applyWish(id){
+  const d = drafts[id]; if (!d || d.saving) return;
+  const v = d.ta.value; d.saving = true; d.apply.disabled = true; d.status.textContent = t("Saving…");
+  try {
+    await updateDoc(doc(db, "groups", GID, "wishes", id), { wishlist: v });
+    S.wishes[id] = { ...(S.wishes[id] || {}), wishlist: v };
+    if (d.ta.value === v) d.touched = false;
+    d.status.textContent = t("Saved.");
+  } catch (e) { d.status.textContent = t("Couldn't save just now. Check your connection and tap Apply changes again."); }
+  finally { d.saving = false; d.apply.disabled = false; d.bar.hidden = !isDirty(id); }
+}
+// Show the saved wishlist, unless there are changes here that haven't been applied yet.
+function syncTextarea(ta, id){
+  const w = S.wishes[id], d = drafts[id]; if (!w) return;
+  if (d && d.ta === ta && isDirty(id)) { refreshDraft(id); return; }
+  if (ta.value !== (w.wishlist || "")) ta.value = w.wishlist || "";
+  if (d) d.touched = false;
+  refreshDraft(id);
+}
+// Don't lose unsaved wishlist changes by leaving the page.
+window.addEventListener("beforeunload", e => { if (Object.keys(drafts).some(isDirty)) { e.preventDefault(); e.returnValue = ""; } });
 
 let renderedCalKey = null;
 let myHelpers = null;
@@ -318,6 +348,7 @@ function render(){
       myHelpers = { kind: gk, ...wishlistHelpers($("myWish"), "adult", gk) };
       $("myWish").before(myHelpers.chips); $("myWish").after(myHelpers.meter);
     }
+    ensureMyEditor();
     syncTextarea($("myWish"), me.wishId);
     myHelpers.update();
     // Kids are optional per group; hide everything about them when they're off.
@@ -372,10 +403,10 @@ function renderKids(){
       row = el("div", "kidrow"); row.dataset.id = k.id;
       const head = el("span", "label namewithicon"); head.append(babyIcon(), t("{name}'s wishlist", { name: k.name })); row.append(head);
       const ta = el("textarea"); ta.maxLength = 4000; ta.placeholder = t("Tap a prompt above, or type anything you'd like…"); ta.setAttribute("aria-label", t("{name}'s wishlist", { name: k.name }));
-      const st = el("p", "hint", "Saves as you type.");
-      ta.addEventListener("input", () => saveWish(k.wishId, ta.value, st));
+      const st = el("p", "hint", "Tap Apply changes to save.");
+      const bar = wishEditor(ta, k.wishId, st, "Tap Apply changes to save.");
       const h = wishlistHelpers(ta, "kid"); row._helpers = h;
-      row.append(h.chips, ta, h.meter, st); list.append(row);
+      row.append(h.chips, ta, h.meter, bar, st); list.append(row);
     }
     syncTextarea(row.querySelector("textarea"), k.wishId);
     if (row._helpers) row._helpers.update();
@@ -646,7 +677,13 @@ async function addKid(name){
   $("kidBtn").disabled = false;
 }
 
-$("myWish").addEventListener("input", () => saveWish(S.me.wishId, $("myWish").value, $("wishStatus")));
+let myEditorFor = null;
+function ensureMyEditor(){
+  if (!S.me || myEditorFor === S.me.wishId) return;
+  if (myEditorFor) { const old = drafts[myEditorFor]; if (old) old.bar.remove(); delete drafts[myEditorFor]; }
+  myEditorFor = S.me.wishId;
+  $("wishStatus").before(wishEditor($("myWish"), S.me.wishId, $("wishStatus"), "Only the person who draws your name sees this."));
+}
 $("volunteer").addEventListener("change", async () => {
   const v = $("volunteer").checked;
   try { await updateDoc(doc(db, "groups", GID, "people", S.secret), { kidVolunteer: v }); $("volunteerHint").textContent = v ? "Thanks! You may get a kid to buy for as well." : "Kids get a gift but don't give one, so a few adults buy a second gift for a kid. Volunteers are picked first."; }
