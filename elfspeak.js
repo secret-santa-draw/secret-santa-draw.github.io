@@ -1,8 +1,8 @@
 // Elf-speak: before a secret chat message is sent, names are bleeped out on this device and
 // the message is rewritten by an AI as a giddy, sweet elf, so nobody can tell who wrote it from
 // their tone, word choice, spelling or grammar. The original words are never stored.
-import { app } from "./app.js?v=202610080053";
-import { appCheckSiteKey } from "./firebase-config.js?v=202610080053";
+import { app } from "./app.js?v=202610080059";
+import { appCheckSiteKey } from "./firebase-config.js?v=202610080059";
 
 const SDK = "https://www.gstatic.com/firebasejs/12.19.0/";
 // Models to try, in order. Not every model is open to every project, so the first one that
@@ -73,15 +73,15 @@ async function generate(text){
   const make = await loadAI();
   let saved = null; try { saved = localStorage.getItem(MODEL_KEY); } catch (e) {}
   const order = saved && MODELS.includes(saved) ? [saved, ...MODELS.filter(m => m !== saved)] : MODELS;
-  let last;
+  let last, first;
   for (const name of order) {
     try {
       const res = await Promise.race([make(name).generateContent(text), new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 15000))]);
       try { localStorage.setItem(MODEL_KEY, name); } catch (e) {}
       return res;
-    } catch (e) { last = e; if (!isMissingModel(e)) throw e; }   // only move on when this model isn't available
+    } catch (e) { last = e; first = first || e; if (!isMissingModel(e)) throw e; }   // only move on when this model isn't available
   }
-  throw last;
+  throw first || last;
 }
 
 // ---------- Built-in elf (used if the AI can't be reached) ----------
@@ -105,16 +105,17 @@ export function simpleElf(text, lang){
 }
 
 // A plain-language reason the AI couldn't be used, so setup problems are easy to spot.
+const googleSays = e => String((e && e.message) || "").replace(/^AI:\s*/, "").replace(/Error fetching from \S+:\s*/g, "").replace(/https?:\/\/\S+/g, "").replace(/\s+/g, " ").trim().slice(0, 300);
 function reasonFor(e){
   const m = String((e && (e.code || "")) + " " + (e && e.message || e) + " " + JSON.stringify((e && e.customErrorData) || {})).toLowerCase();
   if (m.includes("timeout")) return "it took too long to answer";
   if (m.includes("app-check") || m.includes("app check") || m.includes("appcheck")) return "App Check isn't finished (register the reCAPTCHA secret key in Firebase App Check)";
-  if (m.includes("service_disabled") || m.includes("has not been used") || m.includes("is disabled") || m.includes("api-not-enabled")) return "Firebase AI Logic isn't turned on yet (AI Services > AI Logic > Get started): " + String((e && e.message) || "").replace(/https?:\/\/\S+/g, "").slice(0, 160);
+  if (m.includes("service_disabled") || m.includes("has not been used") || m.includes("is disabled") || m.includes("api-not-enabled")) return "Firebase AI Logic isn't turned on yet. Google says: " + googleSays(e);
   if (m.includes("api_key_service_blocked") || m.includes("are blocked")) return "the website's Firebase key isn't allowed to use AI Logic";
-  if (m.includes("not found") || m.includes("404")) return "none of the AI models are available to this project: " + String((e && e.message) || "").slice(0, 160);
+  if (m.includes("not found") || m.includes("404")) return "the AI model isn't available. Google says: " + googleSays(e);
   if (m.includes("429") || m.includes("quota") || m.includes("resource_exhausted")) return "the free AI limit was reached for now";
   if (m.includes("failed to fetch") || m.includes("network")) return "no connection to the AI";
-  return (e && (e.code || e.message) || "unknown").toString().slice(0, 140);
+  return "Google says: " + (googleSays(e) || (e && e.code) || "unknown");
 }
 
 // Turn what someone typed into what their elf says. Names never leave this device.
