@@ -1,8 +1,8 @@
 // Elf-speak: before a secret chat message is sent, names are bleeped out on this device and
 // the message is rewritten by an AI as a giddy, sweet elf, so nobody can tell who wrote it from
 // their tone, word choice, spelling or grammar. The original words are never stored.
-import { app } from "./app.js?v=202610080059";
-import { appCheckSiteKey } from "./firebase-config.js?v=202610080059";
+import { app } from "./app.js?v=202610080102";
+import { appCheckSiteKey } from "./firebase-config.js?v=202610080102";
 
 const SDK = "https://www.gstatic.com/firebasejs/12.19.0/";
 // Models to try, in order. Not every model is open to every project, so the first one that
@@ -68,7 +68,8 @@ function loadAI(){
   })().catch(e => { aiP = null; throw e; });
   return aiP;
 }
-const isMissingModel = e => /not found|404|not supported|is not available|unsupported model|invalid model/i.test(String((e && e.message) || e));
+// A model that isn't open to this project (try the next one). "genai config not found" is a setup problem, not a model one.
+const isMissingModel = e => { const m = String((e && e.message) || e); return !/config not found/i.test(m) && /not found|404|not supported|is not available|unsupported model|invalid model/i.test(m); };
 async function generate(text){
   const make = await loadAI();
   let saved = null; try { saved = localStorage.getItem(MODEL_KEY); } catch (e) {}
@@ -112,6 +113,7 @@ function reasonFor(e){
   if (m.includes("app-check") || m.includes("app check") || m.includes("appcheck")) return "App Check isn't finished (register the reCAPTCHA secret key in Firebase App Check)";
   if (m.includes("service_disabled") || m.includes("has not been used") || m.includes("is disabled") || m.includes("api-not-enabled")) return "Firebase AI Logic isn't turned on yet. Google says: " + googleSays(e);
   if (m.includes("api_key_service_blocked") || m.includes("are blocked")) return "the website's Firebase key isn't allowed to use AI Logic";
+  if (m.includes("config not found")) return "Google is still finishing the AI Logic setup. Try again in a few minutes";
   if (m.includes("not found") || m.includes("404")) return "the AI model isn't available. Google says: " + googleSays(e);
   if (m.includes("429") || m.includes("quota") || m.includes("resource_exhausted")) return "the free AI limit was reached for now";
   if (m.includes("failed to fetch") || m.includes("network")) return "no connection to the AI";
