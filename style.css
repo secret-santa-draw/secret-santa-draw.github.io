@@ -314,3 +314,4 @@ body.sheetopen{overflow:hidden}
 .elfprevrow{display:flex;align-items:flex-end;gap:8px}
 .elfprevrow .bubble{max-width:100%;background:var(--paper)}
 .elfpreview .hint{font-size:.8rem;margin:0}
+.namebleep{display:inline-block;padding:0 7px;margin:0 1px;border-radius:999px;background:var(--gold);color:#1d1606;font-size:.85em;font-weight:700;line-height:1.5;white-space:nowrap}

@@ -31,30 +31,58 @@ export function maskNames(text, names){
   });
   return out;
 }
-const BLEEPS = { en: ["🔔*jingle-jingle*🔔", "🤫*ho-ho-hush!*", "🔔*bleep-a-bell*🔔", "✨*shh, secret!*✨"], ko: ["🔔*딸랑딸랑*🔔", "🤫*쉿, 비밀!*", "🔔*삐-삐-빙*🔔", "✨*비밀이에요!*✨"] };
-export function bleep(text, lang){
-  const opts = BLEEPS[lang] || BLEEPS.en; let i = 0;
-  return text.replace(/\[\s*NAME\s*\]/gi, () => opts[(i++) % opts.length]);
-}
+// One clear marker everywhere a name was, so it's obvious a name was hidden (and chats style it as a little tag).
+export const BLEEP = { en: "[🔔 name hidden]", ko: "[🔔 이름 비밀]" };
+export const BLEEP_RE = /\[🔔 (?:name hidden|이름 비밀)\]/g;
+export function bleep(text, lang){ return text.replace(/\[\s*NAME\s*\]/gi, BLEEP[lang] || BLEEP.en); }
 
 // ---------- The elf filter ----------
-const OPEN = { en: ["Jingle bells! ", "Tee-hee! ", "Oh my sparkles! ", "Hello hello! "], ko: ["징글벨! ", "히히! ", "반짝반짝! ", "안녕안녕! "] };
-const CLOSE = { en: [" ✨", " 🎄", " ❄️✨", " 🎁"], ko: [" ✨", " 🎄", " ❄️✨", " 🎁"] };
-const SWAPS = [[/\b(lol|lmao|haha+|hehe+|hah)\b/gi, "tee-hee"], [/\bu\b/gi, "you"], [/\bur\b/gi, "your"], [/\bthx\b|\bty\b/gi, "thank you"], [/\bpls\b|\bplz\b/gi, "please"],
-  [/\bidk\b/gi, "I'm not sure"], [/\bbtw\b/gi, "by the way"], [/\bgonna\b/gi, "going to"], [/\bwanna\b/gi, "want to"], [/\bya\b/gi, "you"], [/\byeah\b|\byep\b|\byup\b/gi, "yes"], [/\bnope\b|\bnah\b/gi, "no"],
-  [/\bomg\b/gi, "oh my goodness"], [/\br\b/gi, "are"], [/\btho\b/gi, "though"], [/\bcuz\b/gi, "because"], [/\bk\b|\bkk\b|\bok\b|\bokay\b/gi, "okay"], [/\bthru\b/gi, "through"], [/\bim\b/gi, "I'm"], [/\bdont\b/gi, "don't"], [/\bcant\b/gi, "can't"]];
+// Kept light on purpose: the goal is that everyone's messages read the same way, not to bury
+// them in decoration. It removes personal texting habits (emoji, laughs, slang, ALL CAPS,
+// "!!!", stretched words, common misspellings), evens out greetings and thanks, and ends each
+// message with one sparkle.
+const LAUGH_EN = /\b(?:lo+l+|lmf?ao+|rofl|ha(?:ha)+h?|he(?:he)+|hihi+|jk|xd)\b/gi;
+const EMOTICON = /(^|\s)(?:[:;=8xX][-^'o]?[)(\]\[dDpPoO3|\\/*]+|<3+|\^\^|\^_\^|T_T|;_;)(?=\s|$)/g;
+const WORDS = [
+  ["u", "you"], ["ur", "your"], ["ya", "you"], ["yall", "you all"], ["r", "are"], ["n", "and"], ["b4", "before"], ["2day", "today"], ["2morrow", "tomorrow"], ["tmrw", "tomorrow"], ["tmr", "tomorrow"],
+  ["thx", "thank you"], ["thnx", "thank you"], ["thanx", "thank you"], ["ty", "thank you"], ["tysm", "thank you so much"], ["pls", "please"], ["plz", "please"], ["plez", "please"],
+  ["idk", "I don't know"], ["idc", "I don't mind"], ["imo", "I think"], ["imho", "I think"], ["btw", "by the way"], ["tbh", "honestly"], ["ngl", "honestly"], ["fyi", "just so you know"],
+  ["omg", "oh my"], ["omgosh", "oh my"], ["gonna", "going to"], ["wanna", "want to"], ["gotta", "have to"], ["kinda", "kind of"], ["sorta", "sort of"], ["lemme", "let me"], ["gimme", "give me"],
+  ["tho", "though"], ["thru", "through"], ["cuz", "because"], ["bc", "because"], ["coz", "because"], ["w/", "with"], ["w/o", "without"], ["prob", "probably"], ["probs", "probably"], ["def", "definitely"], ["rn", "right now"],
+  ["yeah", "yes"], ["yea", "yes"], ["yep", "yes"], ["yup", "yes"], ["yas", "yes"], ["nope", "no"], ["nah", "no"], ["k", "okay"], ["kk", "okay"], ["ok", "okay"], ["okie", "okay"], ["okey", "okay"],
+  ["im", "I'm"], ["ive", "I've"], ["dont", "don't"], ["cant", "can't"], ["wont", "won't"], ["didnt", "didn't"], ["doesnt", "doesn't"], ["isnt", "isn't"], ["wasnt", "wasn't"], ["thats", "that's"], ["whats", "what's"], ["youre", "you're"], ["theyre", "they're"], ["theres", "there's"],
+  ["definately", "definitely"], ["definetly", "definitely"], ["alot", "a lot"], ["recieve", "receive"], ["wierd", "weird"], ["thier", "their"], ["untill", "until"], ["tommorow", "tomorrow"], ["tomorow", "tomorrow"], ["beleive", "believe"], ["occured", "occurred"], ["seperate", "separate"], ["xmas", "Christmas"], ["chrismas", "Christmas"], ["fav", "favorite"], ["fave", "favorite"], ["favourite", "favorite"], ["colour", "color"], ["sz", "size"],
+  ["awesome", "wonderful"], ["amazing", "wonderful"], ["sooo", "so"], ["soo", "so"]
+];
+const WORD_MAP = new Map(WORDS.map(([a, b]) => [a.toLowerCase(), b]));
+const KEEP_CAPS = new Set(["LEGO", "IKEA", "NASA", "NIKE", "USA", "NYC", "LA", "UK", "NFL", "NBA", "MLB", "NHL", "DVD", "XXL", "XXXL", "ASAP", "DIY", "BTS", "PS5", "TV", "KPOP", "UGG", "UGGS", "HBO", "CD", "ID", "USB", "LED", "PJS", "IPAD", "XL", "XS"]);
+const GREETING = /^(?:h+i+|h+e+y+a*|hello+|hiya|howdy|yo+|sup|wassup|whats up|good (?:morning|afternoon|evening))\b[\s,!.]*/i;
+const THANKS = /\b(?:thanks+|thank u|thank ya|thank you+)\b(?: so much| a lot| a bunch)?/gi;
 export function simpleElf(text, lang){
-  const pick = (a) => a[Math.floor(Math.random() * a.length)];
-  let s = String(text).replace(/\p{Extended_Pictographic}/gu, "").replace(/\s+/g, " ").trim();
-  if (lang !== "ko") {
-    SWAPS.forEach(([re, to]) => { s = s.replace(re, to); });
-    // Even out capitals without touching sizes or brands: shouting becomes normal, sentences start with a capital.
-    if (s.length > 8 && s === s.toUpperCase()) s = s.toLowerCase().replace(/\[name\]/g, PLACEHOLDER);
-    s = s.replace(/\bi\b/g, "I").replace(/(^|[.!?]\s+)(\p{Ll})/gu, (m, a, b) => a + b.toUpperCase());
+  let s = String(text).replace(/\p{Extended_Pictographic}|️|‍/gu, " ").replace(EMOTICON, "$1 ");
+  if (lang === "ko") {
+    s = s.replace(/[ㅋㅎ]{2,}|[ㅠㅜ]{1,}|ㄷㄷ+|ㅇㅇ|ㄴㄴ/g, " ").replace(/~+/g, "!");
+  } else {
+    if (!s.replace(LAUGH_EN, "").replace(/[\s.!?,]/g, "")) return "Tee-hee! ✨";            // just a laugh
+    s = s.replace(LAUGH_EN, " ");
+    s = s.replace(/\bu\s+r\b/gi, "you are").replace(/\bur\b(?=\s+(?:going|gonna|welcome|so|the|right|a|an|very|too|not|such|always|never|probably|definitely|\w+ing)\b)/gi, "you're");
+    s = s.replace(/(\p{L})\1{2,}/gu, "$1$1");                                   // "sooooo" -> "soo"
+    s = s.replace(/[\p{L}\p{N}/']+/gu, w => { const r = WORD_MAP.get(w.toLowerCase()); return r === undefined ? w : r; });
+    if (s.replace(/\[NAME\]/g, "").length > 6 && s.replace(/\[NAME\]/g, "") === s.replace(/\[NAME\]/g, "").toUpperCase()) s = s.toLowerCase().replace(/\[name\]/g, PLACEHOLDER);
+    // Shouted words calm down (known all-caps names like LEGO stay).
+    s = s.replace(/\b[A-Z]{3,}\b/g, w => KEEP_CAPS.has(w) ? w : w.toLowerCase())
+         .replace(/\b(?:SO|NO|MY|ME|BE|DO|GO|IN|IT|IS|OF|ON|TO|UP|AT|OR|AN|AM|WE|HE)\b/g, w => w.toLowerCase());
+    s = s.replace(GREETING, "Hello! ").replace(THANKS, "thank you");
+    s = s.replace(/\bi\b/g, "I").replace(/\boh my\b(?=\s+\w)/gi, "oh my,").replace(/^(yes|no|okay)\s+(?=\w)/i, "$1, ");
   }
-  s = s.replace(/([!?.])\1+/g, "$1").replace(/\s+([,.!?])/g, "$1");
-  if (s && !/[.!?…~]$/.test(s)) s += lang === "ko" ? "~" : "!";
-  return pick(OPEN[lang] || OPEN.en) + s + pick(CLOSE[lang] || CLOSE.en);
+  s = s.replace(/\s+/g, " ").trim()
+       .replace(/\.{2,}|…/g, ".").replace(/[?!]*\?[?!]*/g, "?").replace(/!+/g, "!").replace(/,{2,}/g, ",")
+       .replace(/\s+([,.!?])/g, "$1").replace(/([,.!?])(?=[^\s,.!?\])])/gu, "$1 ").replace(/^[,.!?\s]+/, "");
+  if (lang !== "ko") s = s.replace(/(^|[.!?]\s+)(\p{Ll})/gu, (m, a, b) => a + b.toUpperCase());
+  if (!s) return lang === "ko" ? "히히! ✨" : "Tee-hee! ✨";
+  // A question without a question mark gets one.
+  if (!/[.!?]$/.test(s)) s += (lang !== "ko" && /(?:^|[.!?]\s+)(?:what|who|whom|whose|where|when|why|how|which|do|does|did|is|are|am|was|were|can|could|would|will|should|shall|have|has|any)\b[^.!?]*$/i.test(s)) ? "?" : "!";
+  return s + " ✨";
 }
 
 // Turn what someone typed into what their elf says.
