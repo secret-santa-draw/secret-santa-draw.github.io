@@ -335,3 +335,4 @@ button.kidremove{color:var(--err);padding:4px 8px;font-weight:600;flex:none}
 button.danger{background:var(--err);color:#fff;border-color:var(--err)}
 .kidadd{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:14px;margin-top:6px}
 .kidadd .hint{margin:0}
+.wishstatus:empty{display:none}

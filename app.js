@@ -1,8 +1,8 @@
 // Shared setup for every page: Firebase, small helpers, and "my groups".
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, getDoc, setDoc, deleteField, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-import { t, locale } from "./i18n.js?v=202610092048";
-import { firebaseConfig } from "./firebase-config.js?v=202610092048";
+import { t, locale } from "./i18n.js?v=202610092054";
+import { firebaseConfig } from "./firebase-config.js?v=202610092054";
 
 // Lets the site install as an app and open quickly on a weak connection.
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});

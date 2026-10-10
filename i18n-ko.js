@@ -545,5 +545,6 @@ export default {
   "Are any of your children joining?": "자녀도 함께하나요?",
   "Kids get a gift but don't buy one.": "아이는 선물을 받지만 사지는 않아요.",
   "Kids get a gift but don't buy one. Only one parent needs to add each child.": "아이는 선물을 받지만 사지는 않아요. 부모 중 한 명만 추가하면 돼요.",
-  "Want to buy for someone else's child instead? Don't add them here. Tick \"I'm happy to buy for a kid too\" in your wishlist.": "다른 사람의 아이에게 선물하고 싶나요? 여기에 추가하지 말고, 위시리스트에서 \"아이 선물도 기꺼이 준비할게요\"에 체크하세요."
+  "Want to buy for someone else's child instead? Don't add them here. Tick \"I'm happy to buy for a kid too\" in your wishlist.": "다른 사람의 아이에게 선물하고 싶나요? 여기에 추가하지 말고, 위시리스트에서 \"아이 선물도 기꺼이 준비할게요\"에 체크하세요.",
+  "{name} was taken off the list.": "{name}을(를) 명단에서 뺐어요."
 };

@@ -16,19 +16,19 @@
 <!-- Start downloading all scripts at once instead of one after another -->
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js">
-<link rel="modulepreload" href="./app.js?v=202610092048">
-<link rel="modulepreload" href="./i18n.js?v=202610092048">
-<link rel="modulepreload" href="./santa-loader.js?v=202610092048">
-<link rel="modulepreload" href="./nav.js?v=202610092048">
-<link rel="modulepreload" href="./calendar.js?v=202610092048">
-<link rel="modulepreload" href="./icons.js?v=202610092048">
-<link rel="modulepreload" href="./address.js?v=202610092048">
-<link rel="modulepreload" href="./prompts.js?v=202610092048">
-<link rel="modulepreload" href="./firebase-config.js?v=202610092048">
+<link rel="modulepreload" href="./app.js?v=202610092054">
+<link rel="modulepreload" href="./i18n.js?v=202610092054">
+<link rel="modulepreload" href="./santa-loader.js?v=202610092054">
+<link rel="modulepreload" href="./nav.js?v=202610092054">
+<link rel="modulepreload" href="./calendar.js?v=202610092054">
+<link rel="modulepreload" href="./icons.js?v=202610092054">
+<link rel="modulepreload" href="./address.js?v=202610092054">
+<link rel="modulepreload" href="./prompts.js?v=202610092054">
+<link rel="modulepreload" href="./firebase-config.js?v=202610092054">
 <!-- Fonts load without holding up the page -->
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Jua&family=Figtree:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Jua&family=Figtree:wght@400;500;600;700&display=swap"></noscript>
-<link rel="stylesheet" href="style.css?v=202610092048">
+<link rel="stylesheet" href="style.css?v=202610092054">
 </head>
 <body>
 <div class="wrap">
@@ -148,6 +148,7 @@
   <section id="kidsSec" hidden>
     <h2>Your children</h2>
     <div class="panel">
+      <p id="kidNotice" class="msg" hidden></p>
       <div id="kidAsk" class="kidask" hidden>
         <b>Are any of your children joining?</b>
         <p class="hint">Kids get a gift but don't buy one.</p>
@@ -253,20 +254,20 @@ setTimeout(function(){ if (window.__ssReady) return; var d=document.createElemen
 </script>
 <script type="module">
 import { configured, db, $, el, msg, randomId, fmtDate, personalLink, groupLink, formatMoney, currencyOf, normalizePhone, formatPhone, formatOf, kindOf, kidsOn, homeLink, organizeLink, groupIdFromUrl,
-         localGroups, rememberGroup, dropSecret } from "./app.js?v=202610092048";
+         localGroups, rememberGroup, dropSecret } from "./app.js?v=202610092054";
 import { doc, getDoc, setDoc, deleteDoc, onSnapshot, collection, writeBatch, updateDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-import { showLoading, hideLoading } from "./santa-loader.js?v=202610092048";
-import { babyIcon, normName, firstName, kidRosterId } from "./icons.js?v=202610092048";
-import { US_STATES, checkAddress, lookupUS, sameAddress, exactlySame, labelLines, oneLine } from "./address.js?v=202610092048";
+import { showLoading, hideLoading } from "./santa-loader.js?v=202610092054";
+import { babyIcon, normName, firstName, kidRosterId } from "./icons.js?v=202610092054";
+import { US_STATES, checkAddress, lookupUS, sameAddress, exactlySame, labelLines, oneLine } from "./address.js?v=202610092054";
 window.__ssReady = true;
-import { elfify, BLEEP_RE, TRAITS, WELL_ROUNDED, cleanTraits } from "./elfspeak.js?v=202610092048";
-import { threadsFor, watchThread, sendMessage, lastRead, markRead, unreadIn, msgTime, elfLabel, elfAvatar, STARTERS, MAX_LEN } from "./chat.js?v=202610092048";
-import { wishlistHelpers } from "./prompts.js?v=202610092048";
-import { calendarIcon } from "./calendar.js?v=202610092048";
-import { t, startTranslating } from "./i18n.js?v=202610092048";
+import { elfify, BLEEP_RE, TRAITS, WELL_ROUNDED, cleanTraits } from "./elfspeak.js?v=202610092054";
+import { threadsFor, watchThread, sendMessage, lastRead, markRead, unreadIn, msgTime, elfLabel, elfAvatar, STARTERS, MAX_LEN } from "./chat.js?v=202610092054";
+import { wishlistHelpers } from "./prompts.js?v=202610092054";
+import { calendarIcon } from "./calendar.js?v=202610092054";
+import { t, startTranslating } from "./i18n.js?v=202610092054";
 const tr = t;
 startTranslating();
-import { mountNav } from "./nav.js?v=202610092048";
+import { mountNav } from "./nav.js?v=202610092054";
 mountNav();
 
 const GID = groupIdFromUrl();
@@ -311,8 +312,8 @@ function refreshDraft(id){
   const d = drafts[id]; if (!d || d.saving) return;
   const dirty = isDirty(id);
   d.bar.hidden = !dirty;
-  if (dirty) d.status.textContent = t("You have changes that aren't saved yet.");
-  else if (d.status.textContent === t("You have changes that aren't saved yet.")) d.status.textContent = t(d.idle);
+  // The Apply button says it all while there are changes; afterwards, back to the usual note.
+  if (dirty && d.status.textContent !== (d.idle ? t(d.idle) : "")) d.status.textContent = d.idle ? t(d.idle) : "";
 }
 async function applyWish(id){
   const d = drafts[id]; if (!d || d.saving) return;
@@ -322,6 +323,7 @@ async function applyWish(id){
     S.wishes[id] = { ...(S.wishes[id] || {}), wishlist: v };
     if (d.ta.value === v) d.touched = false;
     d.status.textContent = t("Saved.");
+    setTimeout(() => { if (d.status.textContent === t("Saved.")) d.status.textContent = d.idle ? t(d.idle) : ""; }, 3000);
   } catch (e) { d.status.textContent = t("Couldn't save just now. Check your connection and tap Apply changes again."); }
   finally { d.saving = false; d.apply.disabled = false; d.bar.hidden = !isDirty(id); }
 }
@@ -432,8 +434,8 @@ function renderKids(){
       const headRow = el("div", "kidhead");
       const head = el("span", "label namewithicon"); head.append(babyIcon(), t("{name}'s wishlist", { name: k.name })); headRow.append(head); row.append(headRow);
       const ta = el("textarea"); ta.maxLength = 4000; ta.placeholder = t("Tap a prompt above, or type anything you'd like…"); ta.setAttribute("aria-label", t("{name}'s wishlist", { name: k.name }));
-      const st = el("p", "hint", "Tap Apply changes to save.");
-      const bar = wishEditor(ta, k.wishId, st, "Tap Apply changes to save.");
+      const st = el("p", "hint wishstatus");
+      const bar = wishEditor(ta, k.wishId, st, "");
       const h = wishlistHelpers(ta, "kid"); row._helpers = h;
       // Parents can take their own child off the list until names are drawn.
       const rm = el("button", "small ghost kidremove", t("Remove")); rm.type = "button"; rm.setAttribute("aria-label", t("Remove {name}", { name: k.name }));
@@ -835,8 +837,14 @@ function indexKid(k){
     // so only skip it for the rest of this visit and try again next time.
     .catch(err => { if (err && err.code === "permission-denied") { try { sessionStorage.setItem(key, "1"); } catch (e) {} } });
 }
+// A short note at the top of the kids section (where the child was), which fades after a moment.
+let kidNoticeTimer = null;
+function kidNotice(kind, text){
+  const n = $("kidNotice"); msg("kidNotice", kind, text);
+  clearTimeout(kidNoticeTimer); if (kind === "ok") kidNoticeTimer = setTimeout(() => { n.hidden = true; }, 5000);
+}
 async function removeMyKid(k, btn){
-  btn.disabled = true; msg("kidMsg", "", "");
+  btn.disabled = true; msg("kidMsg", "", ""); msg("kidNotice", "", "");
   showLoading(t("Taking {name} off the list…", { name: k.name }));
   try {
     try { await updateDoc(doc(db, "groups", GID, "wishes", k.wishId), { wishlist: "" }); } catch (e) {}
@@ -845,10 +853,10 @@ async function removeMyKid(k, btn){
     b.delete(doc(db, "groups", GID, "roster", k.rosterId));
     b.delete(doc(db, "groups", GID, "kidIndex", k.rosterId));
     await b.commit();
-    msg("kidMsg", "ok", t("{name} is off the list.", { name: k.name }));
+    kidNotice("ok", t("{name} was taken off the list.", { name: k.name }));
   } catch (e) {
     btn.disabled = false;
-    msg("kidMsg", "err", S.game.drawn ? t("Names have already been drawn, so only the organizer can remove {name} now.", { name: k.name }) : t("Couldn't remove {name} from here. Ask the organizer to remove them from the organizer page.", { name: k.name }));
+    kidNotice("err", S.game.drawn ? t("Names have already been drawn, so only the organizer can remove {name} now.", { name: k.name }) : t("Couldn't remove {name} from here. Ask the organizer to remove them from the organizer page.", { name: k.name }));
   } finally { hideLoading(); }
 }
 async function addKid(name){
