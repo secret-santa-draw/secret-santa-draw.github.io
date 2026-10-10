@@ -330,4 +330,8 @@ body.sheetopen{overflow:hidden}
 .shipblock{display:flex;flex-direction:column;gap:6px;margin-top:10px}
 .kidask{display:flex;flex-direction:column;gap:6px}
 .kidask .hint{margin:0}
-.kidremove{align-self:flex-start}
+.kidhead{display:flex;align-items:center;justify-content:space-between;gap:10px}
+button.kidremove{color:var(--err);padding:4px 8px;font-weight:600;flex:none}
+button.danger{background:var(--err);color:#fff;border-color:var(--err)}
+.kidadd{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:14px;margin-top:6px}
+.kidadd .hint{margin:0}

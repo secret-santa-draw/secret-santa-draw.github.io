@@ -2,7 +2,7 @@
 // message is rewritten in the voice of the sender's elf (with the personality they set for that chat)
 // by an AI relay, or by the built-in elf filter if the relay isn't set up or can't be reached.
 // The original words are never stored.
-import { elfRelayUrl } from "./elf-config.js?v=202610092037";
+import { elfRelayUrl } from "./elf-config.js?v=202610092048";
 
 // ---------- Elf personality ----------
 // Each trait goes from 0 to 4. 2 is the well-rounded middle.

@@ -16,19 +16,19 @@
 <!-- Start downloading all scripts at once instead of one after another -->
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js">
-<link rel="modulepreload" href="./app.js?v=202610092037">
-<link rel="modulepreload" href="./i18n.js?v=202610092037">
-<link rel="modulepreload" href="./santa-loader.js?v=202610092037">
-<link rel="modulepreload" href="./nav.js?v=202610092037">
-<link rel="modulepreload" href="./calendar.js?v=202610092037">
-<link rel="modulepreload" href="./icons.js?v=202610092037">
-<link rel="modulepreload" href="./address.js?v=202610092037">
-<link rel="modulepreload" href="./prompts.js?v=202610092037">
-<link rel="modulepreload" href="./firebase-config.js?v=202610092037">
+<link rel="modulepreload" href="./app.js?v=202610092048">
+<link rel="modulepreload" href="./i18n.js?v=202610092048">
+<link rel="modulepreload" href="./santa-loader.js?v=202610092048">
+<link rel="modulepreload" href="./nav.js?v=202610092048">
+<link rel="modulepreload" href="./calendar.js?v=202610092048">
+<link rel="modulepreload" href="./icons.js?v=202610092048">
+<link rel="modulepreload" href="./address.js?v=202610092048">
+<link rel="modulepreload" href="./prompts.js?v=202610092048">
+<link rel="modulepreload" href="./firebase-config.js?v=202610092048">
 <!-- Fonts load without holding up the page -->
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Jua&family=Figtree:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Jua&family=Figtree:wght@400;500;600;700&display=swap"></noscript>
-<link rel="stylesheet" href="style.css?v=202610092037">
+<link rel="stylesheet" href="style.css?v=202610092048">
 </head>
 <body>
 <div class="wrap">
@@ -146,20 +146,23 @@
   </section>
 
   <section id="kidsSec" hidden>
-    <h2>Your own children</h2>
+    <h2>Your children</h2>
     <div class="panel">
       <div id="kidAsk" class="kidask" hidden>
-        <b>Are any of your own children joining?</b>
-        <p class="hint">Parents add their kids here so each child gets a gift. Kids don't buy one.</p>
+        <b>Are any of your children joining?</b>
+        <p class="hint">Kids get a gift but don't buy one.</p>
         <div class="row"><button type="button" class="primary" id="kidYes">Yes, add my child</button><button type="button" id="kidNo">No</button></div>
       </div>
       <p id="kidNone" class="hint" hidden>None of your children are joining. <button type="button" class="ghost small" id="kidChange">Add a child</button></p>
       <div id="kidMain" hidden>
-        <p class="hint">Add your own child so they get a gift. They won't buy one. Only one parent needs to add each child, and you'll fill in their wishlist.</p>
         <div id="kidList" class="kidlist"></div>
-        <form id="kidForm" class="row" autocomplete="off">
+        <form id="kidForm" class="kidadd" autocomplete="off">
+          <span class="label">Add a child</span>
+          <p class="hint">Kids get a gift but don't buy one. Only one parent needs to add each child.</p>
+          <div class="row">
           <input id="kidName" placeholder="Your child's name" aria-label="Your child's name" maxlength="40">
           <button type="submit" id="kidBtn">Add child</button>
+          </div>
         </form>
         <div class="confirm" id="kidConfirm" hidden>
           <span id="kidConfirmText"></span>
@@ -167,7 +170,7 @@
         </div>
         <p id="kidMsg" class="msg err" hidden></p>
       </div>
-      <p class="hint" id="kidBuyHint" hidden>Want to buy a gift for someone else's child? Don't add them here. Tick "I'm happy to buy for a kid too" in your wishlist, and the draw will pick a child for you.</p>
+      <p class="hint" id="kidBuyHint" hidden>Want to buy for someone else's child instead? Don't add them here. Tick "I'm happy to buy for a kid too" in your wishlist.</p>
       <p class="hint" id="kidRemoveHint" hidden>Need to remove a child? Ask the organizer.</p>
       <p class="hint" id="kidMailHint" hidden>Your kids' gifts will be mailed to your address.</p>
     </div>
@@ -250,20 +253,20 @@ setTimeout(function(){ if (window.__ssReady) return; var d=document.createElemen
 </script>
 <script type="module">
 import { configured, db, $, el, msg, randomId, fmtDate, personalLink, groupLink, formatMoney, currencyOf, normalizePhone, formatPhone, formatOf, kindOf, kidsOn, homeLink, organizeLink, groupIdFromUrl,
-         localGroups, rememberGroup, dropSecret } from "./app.js?v=202610092037";
+         localGroups, rememberGroup, dropSecret } from "./app.js?v=202610092048";
 import { doc, getDoc, setDoc, deleteDoc, onSnapshot, collection, writeBatch, updateDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-import { showLoading, hideLoading } from "./santa-loader.js?v=202610092037";
-import { babyIcon, normName, firstName, kidRosterId } from "./icons.js?v=202610092037";
-import { US_STATES, checkAddress, lookupUS, sameAddress, exactlySame, labelLines, oneLine } from "./address.js?v=202610092037";
+import { showLoading, hideLoading } from "./santa-loader.js?v=202610092048";
+import { babyIcon, normName, firstName, kidRosterId } from "./icons.js?v=202610092048";
+import { US_STATES, checkAddress, lookupUS, sameAddress, exactlySame, labelLines, oneLine } from "./address.js?v=202610092048";
 window.__ssReady = true;
-import { elfify, BLEEP_RE, TRAITS, WELL_ROUNDED, cleanTraits } from "./elfspeak.js?v=202610092037";
-import { threadsFor, watchThread, sendMessage, lastRead, markRead, unreadIn, msgTime, elfLabel, elfAvatar, STARTERS, MAX_LEN } from "./chat.js?v=202610092037";
-import { wishlistHelpers } from "./prompts.js?v=202610092037";
-import { calendarIcon } from "./calendar.js?v=202610092037";
-import { t, startTranslating } from "./i18n.js?v=202610092037";
+import { elfify, BLEEP_RE, TRAITS, WELL_ROUNDED, cleanTraits } from "./elfspeak.js?v=202610092048";
+import { threadsFor, watchThread, sendMessage, lastRead, markRead, unreadIn, msgTime, elfLabel, elfAvatar, STARTERS, MAX_LEN } from "./chat.js?v=202610092048";
+import { wishlistHelpers } from "./prompts.js?v=202610092048";
+import { calendarIcon } from "./calendar.js?v=202610092048";
+import { t, startTranslating } from "./i18n.js?v=202610092048";
 const tr = t;
 startTranslating();
-import { mountNav } from "./nav.js?v=202610092037";
+import { mountNav } from "./nav.js?v=202610092048";
 mountNav();
 
 const GID = groupIdFromUrl();
@@ -426,23 +429,25 @@ function renderKids(){
     let row = list.querySelector('[data-id="' + k.id + '"]');
     if (!row) {
       row = el("div", "kidrow"); row.dataset.id = k.id;
-      const head = el("span", "label namewithicon"); head.append(babyIcon(), t("{name}'s wishlist", { name: k.name })); row.append(head);
+      const headRow = el("div", "kidhead");
+      const head = el("span", "label namewithicon"); head.append(babyIcon(), t("{name}'s wishlist", { name: k.name })); headRow.append(head); row.append(headRow);
       const ta = el("textarea"); ta.maxLength = 4000; ta.placeholder = t("Tap a prompt above, or type anything you'd like…"); ta.setAttribute("aria-label", t("{name}'s wishlist", { name: k.name }));
       const st = el("p", "hint", "Tap Apply changes to save.");
       const bar = wishEditor(ta, k.wishId, st, "Tap Apply changes to save.");
       const h = wishlistHelpers(ta, "kid"); row._helpers = h;
       // Parents can take their own child off the list until names are drawn.
-      const rm = el("button", "small ghost kidremove", t("Remove {name}", { name: k.name })); rm.type = "button";
+      const rm = el("button", "small ghost kidremove", t("Remove")); rm.type = "button"; rm.setAttribute("aria-label", t("Remove {name}", { name: k.name }));
       const cf = el("div", "confirm"); cf.hidden = true;
       cf.append(el("span", null, t("Take {name} off the list? Their wishlist will be cleared.", { name: k.name })));
-      const yes = el("button", "small", t("Yes, remove")); yes.type = "button";
+      const yes = el("button", "small danger", t("Yes, remove")); yes.type = "button";
       const no = el("button", "small ghost", t("Cancel")); no.type = "button";
       const cr = el("div", "row"); cr.append(yes, no); cf.append(cr);
       rm.onclick = () => { cf.hidden = false; rm.hidden = true; };
       no.onclick = () => { cf.hidden = true; rm.hidden = false; };
       yes.onclick = () => removeMyKid(k, yes);
       row._rm = rm; row._cf = cf;
-      row.append(h.chips, ta, h.meter, bar, st, rm, cf); list.append(row);
+      headRow.append(rm);
+      row.append(cf, h.chips, ta, h.meter, bar, st); list.append(row);
     }
     if (row._rm) { const d = !!S.game.drawn; row._rm.hidden = d || !row._cf.hidden; if (d) row._cf.hidden = true; }
     syncTextarea(row.querySelector("textarea"), k.wishId);
