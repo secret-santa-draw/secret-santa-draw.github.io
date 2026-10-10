@@ -527,6 +527,6 @@ export default {
   "Everyone sees this address after names are drawn, with their recipient's name already added as the second line.": "추첨이 끝나면 모두에게 이 주소가 보이고, 두 번째 줄에는 받을 사람 이름이 미리 들어가 있어요.",
   "Everyone meets in person, but gifts are shipped ahead to the party. Boxes say who they're for, never who they're from, so whoever takes them in can't tell who sent what.": "모두 직접 만나지만, 선물은 미리 파티 장소로 배송해요. 상자에는 받는 사람만 적고 보내는 사람은 적지 않아서, 받아 두는 사람도 누가 보냈는지 알 수 없어요.",
   "Label it with who it's for, not your name. The address is on your match page: {link}": "상자에는 내 이름 말고 받는 사람 이름을 적어 주세요. 주소는 짝 페이지에 있어요: {link}",
-  "Gift for {name}": "{name} 님 선물",
-  "Don't put your own name anywhere on the box. Ordering online and shipping straight here is the most anonymous; sign any gift note \"Your Secret Santa\".": "상자 어디에도 내 이름을 쓰지 마세요. 온라인으로 주문해 이 주소로 바로 보내는 게 가장 익명이에요. 선물 메시지에는 \"당신의 시크릿 산타\"라고 써 주세요."
+  "Don't put your own name anywhere on the box. Ordering online and shipping straight here is the most anonymous; sign any gift note \"Your Secret Santa\".": "상자 어디에도 내 이름을 쓰지 마세요. 온라인으로 주문해 이 주소로 바로 보내는 게 가장 익명이에요. 선물 메시지에는 \"당신의 시크릿 산타\"라고 써 주세요.",
+  "Host or venue name (for the \"c/o\" line)": "호스트 또는 장소 이름 (\"c/o\" 줄에 들어가요)"
 };
