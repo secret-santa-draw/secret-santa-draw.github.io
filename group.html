@@ -16,19 +16,19 @@
 <!-- Start downloading all scripts at once instead of one after another -->
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js">
-<link rel="modulepreload" href="./app.js?v=202610092010">
-<link rel="modulepreload" href="./i18n.js?v=202610092010">
-<link rel="modulepreload" href="./santa-loader.js?v=202610092010">
-<link rel="modulepreload" href="./nav.js?v=202610092010">
-<link rel="modulepreload" href="./calendar.js?v=202610092010">
-<link rel="modulepreload" href="./icons.js?v=202610092010">
-<link rel="modulepreload" href="./address.js?v=202610092010">
-<link rel="modulepreload" href="./prompts.js?v=202610092010">
-<link rel="modulepreload" href="./firebase-config.js?v=202610092010">
+<link rel="modulepreload" href="./app.js?v=202610092013">
+<link rel="modulepreload" href="./i18n.js?v=202610092013">
+<link rel="modulepreload" href="./santa-loader.js?v=202610092013">
+<link rel="modulepreload" href="./nav.js?v=202610092013">
+<link rel="modulepreload" href="./calendar.js?v=202610092013">
+<link rel="modulepreload" href="./icons.js?v=202610092013">
+<link rel="modulepreload" href="./address.js?v=202610092013">
+<link rel="modulepreload" href="./prompts.js?v=202610092013">
+<link rel="modulepreload" href="./firebase-config.js?v=202610092013">
 <!-- Fonts load without holding up the page -->
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Jua&family=Figtree:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Jua&family=Figtree:wght@400;500;600;700&display=swap"></noscript>
-<link rel="stylesheet" href="style.css?v=202610092010">
+<link rel="stylesheet" href="style.css?v=202610092013">
 </head>
 <body>
 <div class="wrap">
@@ -53,7 +53,6 @@
         <div class="row" style="margin-top:10px"><button class="ghost" id="hideMatch" type="button">Hide</button></div>
       </div>
       <p id="noMatch" class="hint" hidden>You joined after names were drawn, so you don't have a match. Ask the organizer.</p>
-      <div id="myCodes" class="mycodes" hidden></div>
     </div>
   </section>
 
@@ -241,22 +240,21 @@ setTimeout(function(){ if (window.__ssReady) return; var d=document.createElemen
   d.querySelector("button").onclick=function(){ location.reload(); }; document.body.appendChild(d); }, 8000);
 </script>
 <script type="module">
-import { giftCode } from "./app.js?v=202610092010";
 import { configured, db, $, el, msg, randomId, fmtDate, personalLink, groupLink, formatMoney, currencyOf, normalizePhone, formatPhone, formatOf, kindOf, kidsOn, homeLink, organizeLink, groupIdFromUrl,
-         localGroups, rememberGroup, dropSecret } from "./app.js?v=202610092010";
+         localGroups, rememberGroup, dropSecret } from "./app.js?v=202610092013";
 import { doc, getDoc, setDoc, deleteDoc, onSnapshot, collection, writeBatch, updateDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-import { showLoading, hideLoading } from "./santa-loader.js?v=202610092010";
-import { babyIcon, normName, firstName, kidRosterId } from "./icons.js?v=202610092010";
-import { US_STATES, checkAddress, lookupUS, sameAddress, exactlySame, labelLines, oneLine } from "./address.js?v=202610092010";
+import { showLoading, hideLoading } from "./santa-loader.js?v=202610092013";
+import { babyIcon, normName, firstName, kidRosterId } from "./icons.js?v=202610092013";
+import { US_STATES, checkAddress, lookupUS, sameAddress, exactlySame, labelLines, oneLine } from "./address.js?v=202610092013";
 window.__ssReady = true;
-import { elfify, BLEEP_RE, TRAITS, WELL_ROUNDED, cleanTraits } from "./elfspeak.js?v=202610092010";
-import { threadsFor, watchThread, sendMessage, lastRead, markRead, unreadIn, msgTime, elfLabel, elfAvatar, STARTERS, MAX_LEN } from "./chat.js?v=202610092010";
-import { wishlistHelpers } from "./prompts.js?v=202610092010";
-import { calendarIcon } from "./calendar.js?v=202610092010";
-import { t, startTranslating } from "./i18n.js?v=202610092010";
+import { elfify, BLEEP_RE, TRAITS, WELL_ROUNDED, cleanTraits } from "./elfspeak.js?v=202610092013";
+import { threadsFor, watchThread, sendMessage, lastRead, markRead, unreadIn, msgTime, elfLabel, elfAvatar, STARTERS, MAX_LEN } from "./chat.js?v=202610092013";
+import { wishlistHelpers } from "./prompts.js?v=202610092013";
+import { calendarIcon } from "./calendar.js?v=202610092013";
+import { t, startTranslating } from "./i18n.js?v=202610092013";
 const tr = t;
 startTranslating();
-import { mountNav } from "./nav.js?v=202610092010";
+import { mountNav } from "./nav.js?v=202610092013";
 mountNav();
 
 const GID = groupIdFromUrl();
@@ -432,7 +430,7 @@ function renderKids(){
 }
 
 function shipBlock(gft){
-  const wrap = el("div", "shipblock"), code = giftCode(gft.wishId), ship = S.match && S.match.shipTo;
+  const wrap = el("div", "shipblock"), ship = S.match && S.match.shipTo;
   const ml = el("span", "label", "Ship it to the party"); wrap.append(ml);
   if (ship && ship.address) {
     const lines = [ship.name, ship.address, ship.note ? "(" + ship.note + ")" : ""].filter(Boolean).join("\n");
@@ -442,35 +440,23 @@ function shipBlock(gft){
     const r = el("div", "row"); r.append(cp); wrap.append(r);
   } else wrap.append(el("p", "wish none", "The organizer hasn't added the party address yet. Check back soon."));
   const cl = el("span", "label", "Write this on the box"); cl.style.marginTop = "10px"; wrap.append(cl);
-  const label = tr("Secret Santa gift {code} · Do not open", { code });
-  const codeBox = el("div", "giftcode"); codeBox.setAttribute("translate", "no"); codeBox.append(el("span", "codetag", "🎁 " + code)); codeBox.append(el("span", null, label)); wrap.append(codeBox);
+  const label = tr("For {name} · From your Secret Santa · Do not open until the party", { name: gft.name });
+  const labelBox = el("div", "giftlabel", label); labelBox.setAttribute("translate", "no"); wrap.append(labelBox);
   const cc = el("button", "small", "Copy label"); cc.type = "button";
   cc.onclick = async () => { try { await navigator.clipboard.writeText(label); cc.textContent = tr("Copied"); } catch (e) { cc.textContent = tr("Couldn't copy"); } setTimeout(() => cc.textContent = tr("Copy label"), 1800); };
   const r2 = el("div", "row"); r2.append(cc); wrap.append(r2);
   const tips = el("details", "shiptips");
   tips.append(el("summary", null, "Keep it anonymous"));
   const ul = el("ul");
-  ["Leave your name off the box and the label. Use the gift code instead of anyone's name.",
-   "Ordering online? Ship it straight to the party address, mark it as a gift, and sign any gift note \"Your Secret Santa\". Put the gift code on the second address line.",
+  ["Leave your own name off the box and the label. Write who it's for, never who it's from.",
+   "Ordering online? Ship it straight to the party address, mark it as a gift, and sign any gift note \"Your Secret Santa\". Put \"For\" and their name on the second address line.",
    "Shipping it yourself? Use the party address as the return address too. Where it was mailed from can be a clue, so ordering online is the most anonymous.",
    "Wrap it (or pick gift wrap when ordering) so it stays a surprise until the party.",
-   "Coming by car? You can bring it instead. Just label it with the gift code the same way."].forEach(x => ul.append(el("li", null, x)));
+   "Coming by car? You can bring it instead. Just label it the same way."].forEach(x => ul.append(el("li", null, x)));
   tips.append(ul); wrap.append(tips);
   return wrap;
 }
-// Shipped to the party: tell each person which gift code to look for (theirs and their kids').
-function renderMyCodes(){
-  const box = $("myCodes"), show = !!(S.game.drawn && S.me && S.match && formatOf(S.game) === "venue");
-  box.hidden = !show; if (!show) return; box.textContent = "";
-  box.append(el("span", "label", "At the party, look for"));
-  const row = el("div", "codes");
-  const add = (who, wishId) => { const c = el("div", "giftcode mine"); c.setAttribute("translate", "no"); c.append(el("span", "codetag", "🎁 " + giftCode(wishId)), el("span", null, who)); row.append(c); };
-  add(tr("Your gift"), S.me.wishId);
-  S.kids.forEach(k => add(tr("{name}'s gift", { name: k.name }), k.wishId));
-  box.append(row, el("p", "hint", "Gifts are shipped to the party with these codes instead of names, so nobody there can tell whose is whose."));
-}
 function renderMatch(){
-  renderMyCodes();
   if (!(S.game.drawn && S.me)) return;
   const gifts = (S.match && S.match.gifts) || [];
   const has = gifts.length > 0;
