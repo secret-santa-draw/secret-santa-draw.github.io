@@ -1,8 +1,8 @@
 // Shared setup for every page: Firebase, small helpers, and "my groups".
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, getDoc, setDoc, deleteField, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-import { t, locale } from "./i18n.js?v=202610080314";
-import { firebaseConfig } from "./firebase-config.js?v=202610080314";
+import { t, locale } from "./i18n.js?v=202610092010";
+import { firebaseConfig } from "./firebase-config.js?v=202610092010";
 
 // Lets the site install as an app and open quickly on a weak connection.
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
@@ -192,6 +192,16 @@ export function smsGroupHref(numbers, body){
 
 // ---------- Group settings with sensible defaults for older groups ----------
 // format: "inperson" | "mixed" (some people join virtually) | "virtual" (everyone mails gifts)
+// "venue": everyone meets in person, but gifts are shipped ahead to the party address.
+// Each gift is labeled with a short code made from the receiver's wishlist id (never a name),
+// so whoever takes in the boxes can't tell who they're from or who they're for.
+export function giftCode(wishId){
+  let h = 2166136261; const s = String(wishId || "");
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  const a = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let out = "";
+  for (let i = 0; i < 4; i++) { out += a[(h >>> 0) % 32]; h = Math.imul(h ^ (h >>> 13), 2654435761); }
+  return out;
+}
 export const formatOf = g => (g && g.format) || (g && g.virtual ? "virtual" : "inperson");
 // kind: "family" | "friends" | "coworkers" | "other"
 export const kindOf = g => (g && g.kind) || "family";
