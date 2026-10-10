@@ -524,16 +524,9 @@ export default {
   "shipped to the party": "파티 장소로 배송",
   "Ship it to the party": "파티 장소로 보내기",
   "The organizer hasn't added the party address yet. Check back soon.": "주최자가 아직 파티 주소를 추가하지 않았어요. 잠시 후 다시 확인해 주세요.",
-  "Write this on the box": "상자에 이렇게 적어 주세요",
-  "Keep it anonymous": "익명으로 보내는 방법",
-  "Shipping it yourself? Use the party address as the return address too. Where it was mailed from can be a clue, so ordering online is the most anonymous.": "직접 보내나요? 보내는 사람 주소에도 파티 주소를 쓰세요. 어디서 보냈는지가 힌트가 될 수 있어서, 온라인 주문이 가장 익명이에요.",
-  "Wrap it (or pick gift wrap when ordering) so it stays a surprise until the party.": "파티 때까지 비밀이 되도록 포장해 주세요 (주문할 때 선물 포장을 골라도 돼요).",
-  "For {name} · From your Secret Santa · Do not open until the party": "받는 사람: {name} · 보내는 사람: 당신의 시크릿 산타 · 파티 전까지 열지 마세요",
-  "Copy label": "라벨 복사",
-  "Leave your own name off the box and the label. Write who it's for, never who it's from.": "상자와 라벨에 내 이름은 쓰지 마세요. 받는 사람만 적고, 보내는 사람은 절대 적지 마세요.",
-  "Ordering online? Ship it straight to the party address, mark it as a gift, and sign any gift note \"Your Secret Santa\". Put \"For\" and their name on the second address line.": "온라인으로 주문하나요? 파티 주소로 바로 보내고, 선물로 표시한 뒤 선물 메시지에는 \"당신의 시크릿 산타\"라고 써 주세요. 주소 두 번째 줄에 받는 사람 이름을 적어 주세요.",
-  "Coming by car? You can bring it instead. Just label it the same way.": "차로 오나요? 직접 가져와도 돼요. 똑같이 라벨만 붙여 주세요.",
-  "Everyone sees this address after names are drawn, along with what to write on the box.": "추첨이 끝나면 모두에게 이 주소와 상자에 적을 내용이 보여요.",
+  "Everyone sees this address after names are drawn, with their recipient's name already added as the second line.": "추첨이 끝나면 모두에게 이 주소가 보이고, 두 번째 줄에는 받을 사람 이름이 미리 들어가 있어요.",
   "Everyone meets in person, but gifts are shipped ahead to the party. Boxes say who they're for, never who they're from, so whoever takes them in can't tell who sent what.": "모두 직접 만나지만, 선물은 미리 파티 장소로 배송해요. 상자에는 받는 사람만 적고 보내는 사람은 적지 않아서, 받아 두는 사람도 누가 보냈는지 알 수 없어요.",
-  "Label it with who it's for, not your name. The address is on your match page: {link}": "상자에는 내 이름 말고 받는 사람 이름을 적어 주세요. 주소는 짝 페이지에 있어요: {link}"
+  "Label it with who it's for, not your name. The address is on your match page: {link}": "상자에는 내 이름 말고 받는 사람 이름을 적어 주세요. 주소는 짝 페이지에 있어요: {link}",
+  "Gift for {name}": "{name} 님 선물",
+  "Don't put your own name anywhere on the box. Ordering online and shipping straight here is the most anonymous; sign any gift note \"Your Secret Santa\".": "상자 어디에도 내 이름을 쓰지 마세요. 온라인으로 주문해 이 주소로 바로 보내는 게 가장 익명이에요. 선물 메시지에는 \"당신의 시크릿 산타\"라고 써 주세요."
 };

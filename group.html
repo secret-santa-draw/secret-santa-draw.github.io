@@ -16,19 +16,19 @@
 <!-- Start downloading all scripts at once instead of one after another -->
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js">
-<link rel="modulepreload" href="./app.js?v=202610092013">
-<link rel="modulepreload" href="./i18n.js?v=202610092013">
-<link rel="modulepreload" href="./santa-loader.js?v=202610092013">
-<link rel="modulepreload" href="./nav.js?v=202610092013">
-<link rel="modulepreload" href="./calendar.js?v=202610092013">
-<link rel="modulepreload" href="./icons.js?v=202610092013">
-<link rel="modulepreload" href="./address.js?v=202610092013">
-<link rel="modulepreload" href="./prompts.js?v=202610092013">
-<link rel="modulepreload" href="./firebase-config.js?v=202610092013">
+<link rel="modulepreload" href="./app.js?v=202610092022">
+<link rel="modulepreload" href="./i18n.js?v=202610092022">
+<link rel="modulepreload" href="./santa-loader.js?v=202610092022">
+<link rel="modulepreload" href="./nav.js?v=202610092022">
+<link rel="modulepreload" href="./calendar.js?v=202610092022">
+<link rel="modulepreload" href="./icons.js?v=202610092022">
+<link rel="modulepreload" href="./address.js?v=202610092022">
+<link rel="modulepreload" href="./prompts.js?v=202610092022">
+<link rel="modulepreload" href="./firebase-config.js?v=202610092022">
 <!-- Fonts load without holding up the page -->
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Jua&family=Figtree:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Jua&family=Figtree:wght@400;500;600;700&display=swap"></noscript>
-<link rel="stylesheet" href="style.css?v=202610092013">
+<link rel="stylesheet" href="style.css?v=202610092022">
 </head>
 <body>
 <div class="wrap">
@@ -241,20 +241,20 @@ setTimeout(function(){ if (window.__ssReady) return; var d=document.createElemen
 </script>
 <script type="module">
 import { configured, db, $, el, msg, randomId, fmtDate, personalLink, groupLink, formatMoney, currencyOf, normalizePhone, formatPhone, formatOf, kindOf, kidsOn, homeLink, organizeLink, groupIdFromUrl,
-         localGroups, rememberGroup, dropSecret } from "./app.js?v=202610092013";
+         localGroups, rememberGroup, dropSecret } from "./app.js?v=202610092022";
 import { doc, getDoc, setDoc, deleteDoc, onSnapshot, collection, writeBatch, updateDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-import { showLoading, hideLoading } from "./santa-loader.js?v=202610092013";
-import { babyIcon, normName, firstName, kidRosterId } from "./icons.js?v=202610092013";
-import { US_STATES, checkAddress, lookupUS, sameAddress, exactlySame, labelLines, oneLine } from "./address.js?v=202610092013";
+import { showLoading, hideLoading } from "./santa-loader.js?v=202610092022";
+import { babyIcon, normName, firstName, kidRosterId } from "./icons.js?v=202610092022";
+import { US_STATES, checkAddress, lookupUS, sameAddress, exactlySame, labelLines, oneLine } from "./address.js?v=202610092022";
 window.__ssReady = true;
-import { elfify, BLEEP_RE, TRAITS, WELL_ROUNDED, cleanTraits } from "./elfspeak.js?v=202610092013";
-import { threadsFor, watchThread, sendMessage, lastRead, markRead, unreadIn, msgTime, elfLabel, elfAvatar, STARTERS, MAX_LEN } from "./chat.js?v=202610092013";
-import { wishlistHelpers } from "./prompts.js?v=202610092013";
-import { calendarIcon } from "./calendar.js?v=202610092013";
-import { t, startTranslating } from "./i18n.js?v=202610092013";
+import { elfify, BLEEP_RE, TRAITS, WELL_ROUNDED, cleanTraits } from "./elfspeak.js?v=202610092022";
+import { threadsFor, watchThread, sendMessage, lastRead, markRead, unreadIn, msgTime, elfLabel, elfAvatar, STARTERS, MAX_LEN } from "./chat.js?v=202610092022";
+import { wishlistHelpers } from "./prompts.js?v=202610092022";
+import { calendarIcon } from "./calendar.js?v=202610092022";
+import { t, startTranslating } from "./i18n.js?v=202610092022";
 const tr = t;
 startTranslating();
-import { mountNav } from "./nav.js?v=202610092013";
+import { mountNav } from "./nav.js?v=202610092022";
 mountNav();
 
 const GID = groupIdFromUrl();
@@ -429,31 +429,25 @@ function renderKids(){
   $("kidRemoveHint").hidden = !S.kids.length;
 }
 
+// Shipped to the party: the party address with "Gift for <name>" already on the second line,
+// so the giver can paste it straight into a shipping form. Their own name goes nowhere.
+function shipLines(ship, name){
+  const addr = String(ship.address || "").split(/\n+/).map(x => x.trim()).filter(Boolean);
+  return [ship.name, addr[0], tr("Gift for {name}", { name }), ...addr.slice(1)].filter(Boolean);
+}
 function shipBlock(gft){
   const wrap = el("div", "shipblock"), ship = S.match && S.match.shipTo;
-  const ml = el("span", "label", "Ship it to the party"); wrap.append(ml);
-  if (ship && ship.address) {
-    const lines = [ship.name, ship.address, ship.note ? "(" + ship.note + ")" : ""].filter(Boolean).join("\n");
-    const card = el("div", "addrcard"); card.setAttribute("translate", "no"); card.textContent = lines; wrap.append(card);
-    const cp = el("button", "small", "Copy address"); cp.type = "button";
-    cp.onclick = async () => { try { await navigator.clipboard.writeText([ship.name, ship.address].filter(Boolean).join("\n")); cp.textContent = tr("Copied"); } catch (e) { cp.textContent = tr("Couldn't copy"); } setTimeout(() => cp.textContent = tr("Copy address"), 1800); };
-    const r = el("div", "row"); r.append(cp); wrap.append(r);
-  } else wrap.append(el("p", "wish none", "The organizer hasn't added the party address yet. Check back soon."));
-  const cl = el("span", "label", "Write this on the box"); cl.style.marginTop = "10px"; wrap.append(cl);
-  const label = tr("For {name} · From your Secret Santa · Do not open until the party", { name: gft.name });
-  const labelBox = el("div", "giftlabel", label); labelBox.setAttribute("translate", "no"); wrap.append(labelBox);
-  const cc = el("button", "small", "Copy label"); cc.type = "button";
-  cc.onclick = async () => { try { await navigator.clipboard.writeText(label); cc.textContent = tr("Copied"); } catch (e) { cc.textContent = tr("Couldn't copy"); } setTimeout(() => cc.textContent = tr("Copy label"), 1800); };
-  const r2 = el("div", "row"); r2.append(cc); wrap.append(r2);
-  const tips = el("details", "shiptips");
-  tips.append(el("summary", null, "Keep it anonymous"));
-  const ul = el("ul");
-  ["Leave your own name off the box and the label. Write who it's for, never who it's from.",
-   "Ordering online? Ship it straight to the party address, mark it as a gift, and sign any gift note \"Your Secret Santa\". Put \"For\" and their name on the second address line.",
-   "Shipping it yourself? Use the party address as the return address too. Where it was mailed from can be a clue, so ordering online is the most anonymous.",
-   "Wrap it (or pick gift wrap when ordering) so it stays a surprise until the party.",
-   "Coming by car? You can bring it instead. Just label it the same way."].forEach(x => ul.append(el("li", null, x)));
-  tips.append(ul); wrap.append(tips);
+  wrap.append(el("span", "label", "Ship it to the party"));
+  if (!(ship && ship.address)) { wrap.append(el("p", "wish none", "The organizer hasn't added the party address yet. Check back soon.")); return wrap; }
+  const lines = shipLines(ship, gft.name);
+  const card = el("div", "addrcard"); card.setAttribute("translate", "no");
+  lines.forEach((ln, i) => { if (i) card.append(document.createElement("br")); card.append(i === 2 ? el("b", null, ln) : ln); });
+  wrap.append(card);
+  if (ship.note) { const n = el("p", "hint", ship.note); n.setAttribute("translate", "no"); wrap.append(n); }
+  const cp = el("button", "small", "Copy address"); cp.type = "button";
+  cp.onclick = async () => { try { await navigator.clipboard.writeText(lines.join("\n")); cp.textContent = tr("Copied"); } catch (e) { cp.textContent = tr("Couldn't copy"); } setTimeout(() => cp.textContent = tr("Copy address"), 1800); };
+  const r = el("div", "row"); r.append(cp); wrap.append(r);
+  wrap.append(el("p", "hint", "Don't put your own name anywhere on the box. Ordering online and shipping straight here is the most anonymous; sign any gift note \"Your Secret Santa\"."));
   return wrap;
 }
 function renderMatch(){
