@@ -8,6 +8,12 @@ service cloud.firestore {
     function isOwner(gid) { return signedIn() && groupDoc(gid).ownerUid == request.auth.uid; }
     function notDrawn(gid) { return groupDoc(gid).drawn != true; }
     function shortText(v, max) { return v is string && v.size() > 0 && v.size() <= max; }
+    // True when the child behind a kid's roster entry has been removed (in this same write).
+    // kidIndex points from the public roster entry to the parent's private record; only these rules read it.
+    function kidGone(gid, rosterId) {
+      let k = get(/databases/$(database)/documents/groups/$(gid)/kidIndex/$(rosterId)).data;
+      return !existsAfter(/databases/$(database)/documents/groups/$(gid)/people/$(k.parent)/kids/$(k.kidId));
+    }
     function groupFields() { return ['ownerUid', 'ev', 'budget', 'kidBudget', 'date', 'drawn', 'drawnAt', 'createdAt', 'virtual', 'format', 'kind', 'kids', 'currency']; }
 
     // Each signed-in person's own list of groups. Only they can see it.
@@ -65,7 +71,8 @@ service cloud.firestore {
         // Kids a parent adds. Reachable only through the parent's secret link.
         match /kids/{kidId} {
           allow read: if true;
-          allow delete: if isOwner(gid);
+          // The organizer, or the parent (who has this secret link) before names are drawn.
+          allow delete: if isOwner(gid) || notDrawn(gid);
           allow create: if notDrawn(gid)
             && exists(/databases/$(database)/documents/groups/$(gid)/people/$(secret))
             && request.resource.data.keys().hasOnly(['name', 'wishId', 'rosterId', 'createdAt'])
@@ -126,10 +133,26 @@ service cloud.firestore {
       // so the same child can't be added twice.
       match /roster/{rosterId} {
         allow read: if true;
-        allow delete: if isOwner(gid);
+        // The organizer, or a parent removing their own child before the draw.
+        allow delete: if isOwner(gid)
+          || (notDrawn(gid) && resource.data.get('kid', false) == true && kidGone(gid, rosterId));
         allow create: if notDrawn(gid)
           && request.resource.data.keys().hasOnly(['name', 'joinedAt', 'kid', 'parentName'])
           && shortText(request.resource.data.name, 40);
+      }
+
+      // Private pointer from a kid's roster entry to their parent's record, so a parent can remove
+      // their own child. Nobody can read it; it can only be created by someone with the parent's link.
+      match /kidIndex/{rosterId} {
+        allow read: if false;
+        allow create: if notDrawn(gid)
+          && request.resource.data.keys().hasOnly(['parent', 'kidId'])
+          && request.resource.data.parent is string && request.resource.data.kidId is string
+          && existsAfter(/databases/$(database)/documents/groups/$(gid)/people/$(request.resource.data.parent)/kids/$(request.resource.data.kidId))
+          && getAfter(/databases/$(database)/documents/groups/$(gid)/people/$(request.resource.data.parent)/kids/$(request.resource.data.kidId)).data.rosterId == rosterId
+          // ...and the public entry must name this same parent, so nobody can point someone else's child at their own record.
+          && get(/databases/$(database)/documents/groups/$(gid)/roster/$(rosterId)).data.parentName == get(/databases/$(database)/documents/groups/$(gid)/people/$(request.resource.data.parent)).data.name;
+        allow delete: if isOwner(gid) || kidGone(gid, rosterId);
       }
 
       // Secret chats between each person and their Secret Santa, after the draw. A conversation is

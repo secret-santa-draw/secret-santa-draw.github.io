@@ -528,5 +528,22 @@ export default {
   "Everyone meets in person, but gifts are shipped ahead to the party. Boxes say who they're for, never who they're from, so whoever takes them in can't tell who sent what.": "모두 직접 만나지만, 선물은 미리 파티 장소로 배송해요. 상자에는 받는 사람만 적고 보내는 사람은 적지 않아서, 받아 두는 사람도 누가 보냈는지 알 수 없어요.",
   "Label it with who it's for, not your name. The address is on your match page: {link}": "상자에는 내 이름 말고 받는 사람 이름을 적어 주세요. 주소는 짝 페이지에 있어요: {link}",
   "Don't put your own name anywhere on the box. Ordering online and shipping straight here is the most anonymous; sign any gift note \"Your Secret Santa\".": "상자 어디에도 내 이름을 쓰지 마세요. 온라인으로 주문해 이 주소로 바로 보내는 게 가장 익명이에요. 선물 메시지에는 \"당신의 시크릿 산타\"라고 써 주세요.",
-  "Host or venue name (for the \"c/o\" line)": "호스트 또는 장소 이름 (\"c/o\" 줄에 들어가요)"
+  "Host or venue name (for the \"c/o\" line)": "호스트 또는 장소 이름 (\"c/o\" 줄에 들어가요)",
+  "Your own children": "내 자녀",
+  "Are any of your own children joining?": "내 자녀도 함께하나요?",
+  "Parents add their kids here so each child gets a gift. Kids don't buy one.": "부모가 여기에서 자녀를 추가하면 아이도 선물을 받아요. 아이는 선물을 사지 않아요.",
+  "Yes, add my child": "네, 내 아이를 추가할게요",
+  "No": "아니요",
+  "None of your children are joining.": "함께하는 자녀가 없어요.",
+  "Add a child": "아이 추가",
+  "Add your own child so they get a gift. They won't buy one. Only one parent needs to add each child, and you'll fill in their wishlist.": "내 아이를 추가하면 아이도 선물을 받아요. 아이는 선물을 사지 않아요. 부모 중 한 명만 추가하면 되고, 위시리스트는 내가 채워요.",
+  "Your child's name": "내 아이 이름",
+  "Want to buy a gift for someone else's child? Don't add them here. Tick \"I'm happy to buy for a kid too\" in your wishlist, and the draw will pick a child for you.": "다른 사람의 아이에게 선물하고 싶나요? 여기에 추가하지 마세요. 위시리스트에서 \"아이 선물도 기꺼이 준비할게요\"에 체크하면 추첨으로 아이를 정해 드려요.",
+  "Bringing your own baby or child? Join yourself first, then add them.": "내 아기나 아이도 함께하나요? 먼저 내가 참여한 뒤 아이를 추가하세요.",
+  "Remove {name}": "{name} 빼기",
+  "Take {name} off the list? Their wishlist will be cleared.": "{name}을(를) 명단에서 뺄까요? 위시리스트도 지워져요.",
+  "Yes, remove": "네, 뺄게요",
+  "{name} is off the list.": "{name}을(를) 명단에서 뺐어요.",
+  "Names have already been drawn, so only the organizer can remove {name} now.": "이미 추첨이 끝나서 이제는 주최자만 {name}을(를) 뺄 수 있어요.",
+  "Couldn't remove {name} from here. Ask the organizer to remove them from the organizer page.": "여기에서는 {name}을(를) 빼지 못했어요. 주최자에게 주최자 화면에서 빼 달라고 요청해 주세요."
 };

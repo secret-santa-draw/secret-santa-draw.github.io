@@ -16,19 +16,19 @@
 <!-- Start downloading all scripts at once instead of one after another -->
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js">
-<link rel="modulepreload" href="./app.js?v=202610092024">
-<link rel="modulepreload" href="./i18n.js?v=202610092024">
-<link rel="modulepreload" href="./santa-loader.js?v=202610092024">
-<link rel="modulepreload" href="./nav.js?v=202610092024">
-<link rel="modulepreload" href="./calendar.js?v=202610092024">
-<link rel="modulepreload" href="./icons.js?v=202610092024">
-<link rel="modulepreload" href="./address.js?v=202610092024">
-<link rel="modulepreload" href="./prompts.js?v=202610092024">
-<link rel="modulepreload" href="./firebase-config.js?v=202610092024">
+<link rel="modulepreload" href="./app.js?v=202610092037">
+<link rel="modulepreload" href="./i18n.js?v=202610092037">
+<link rel="modulepreload" href="./santa-loader.js?v=202610092037">
+<link rel="modulepreload" href="./nav.js?v=202610092037">
+<link rel="modulepreload" href="./calendar.js?v=202610092037">
+<link rel="modulepreload" href="./icons.js?v=202610092037">
+<link rel="modulepreload" href="./address.js?v=202610092037">
+<link rel="modulepreload" href="./prompts.js?v=202610092037">
+<link rel="modulepreload" href="./firebase-config.js?v=202610092037">
 <!-- Fonts load without holding up the page -->
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Jua&family=Figtree:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Jua&family=Figtree:wght@400;500;600;700&display=swap"></noscript>
-<link rel="stylesheet" href="style.css?v=202610092024">
+<link rel="stylesheet" href="style.css?v=202610092037">
 </head>
 <body>
 <div class="wrap">
@@ -79,7 +79,7 @@
       </form>
       <p id="joinMsg" class="msg err" hidden></p>
       <p class="hint">No account needed. You'll get a personal link to come back to.</p>
-      <p class="hint" id="joinKidsHint">Adding a baby or child? Join yourself first, then add them.</p>
+      <p class="hint" id="joinKidsHint">Bringing your own baby or child? Join yourself first, then add them.</p>
     </div>
   </section>
 
@@ -146,20 +146,29 @@
   </section>
 
   <section id="kidsSec" hidden>
-    <h2>Your kids</h2>
+    <h2>Your own children</h2>
     <div class="panel">
-      <p class="hint">Add a baby or child who should get a gift. They won't buy for anyone. Only one parent needs to add each child, and their wishlist is yours to fill in.</p>
-      <div id="kidList" class="kidlist"></div>
-      <form id="kidForm" class="row" autocomplete="off">
-        <input id="kidName" placeholder="Child's name" aria-label="Child's name" maxlength="40">
-        <button type="submit" id="kidBtn">Add child</button>
-      </form>
-      <div class="confirm" id="kidConfirm" hidden>
-        <span id="kidConfirmText"></span>
-        <div class="row"><button type="button" class="primary" id="kidSame">Yes, same child</button><button type="button" id="kidDifferent">No, add a different child</button></div>
+      <div id="kidAsk" class="kidask" hidden>
+        <b>Are any of your own children joining?</b>
+        <p class="hint">Parents add their kids here so each child gets a gift. Kids don't buy one.</p>
+        <div class="row"><button type="button" class="primary" id="kidYes">Yes, add my child</button><button type="button" id="kidNo">No</button></div>
       </div>
-      <p id="kidMsg" class="msg err" hidden></p>
-      <p class="hint" id="kidRemoveHint">Need to remove a child? Ask the organizer.</p>
+      <p id="kidNone" class="hint" hidden>None of your children are joining. <button type="button" class="ghost small" id="kidChange">Add a child</button></p>
+      <div id="kidMain" hidden>
+        <p class="hint">Add your own child so they get a gift. They won't buy one. Only one parent needs to add each child, and you'll fill in their wishlist.</p>
+        <div id="kidList" class="kidlist"></div>
+        <form id="kidForm" class="row" autocomplete="off">
+          <input id="kidName" placeholder="Your child's name" aria-label="Your child's name" maxlength="40">
+          <button type="submit" id="kidBtn">Add child</button>
+        </form>
+        <div class="confirm" id="kidConfirm" hidden>
+          <span id="kidConfirmText"></span>
+          <div class="row"><button type="button" class="primary" id="kidSame">Yes, same child</button><button type="button" id="kidDifferent">No, add a different child</button></div>
+        </div>
+        <p id="kidMsg" class="msg err" hidden></p>
+      </div>
+      <p class="hint" id="kidBuyHint" hidden>Want to buy a gift for someone else's child? Don't add them here. Tick "I'm happy to buy for a kid too" in your wishlist, and the draw will pick a child for you.</p>
+      <p class="hint" id="kidRemoveHint" hidden>Need to remove a child? Ask the organizer.</p>
       <p class="hint" id="kidMailHint" hidden>Your kids' gifts will be mailed to your address.</p>
     </div>
   </section>
@@ -241,20 +250,20 @@ setTimeout(function(){ if (window.__ssReady) return; var d=document.createElemen
 </script>
 <script type="module">
 import { configured, db, $, el, msg, randomId, fmtDate, personalLink, groupLink, formatMoney, currencyOf, normalizePhone, formatPhone, formatOf, kindOf, kidsOn, homeLink, organizeLink, groupIdFromUrl,
-         localGroups, rememberGroup, dropSecret } from "./app.js?v=202610092024";
+         localGroups, rememberGroup, dropSecret } from "./app.js?v=202610092037";
 import { doc, getDoc, setDoc, deleteDoc, onSnapshot, collection, writeBatch, updateDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-import { showLoading, hideLoading } from "./santa-loader.js?v=202610092024";
-import { babyIcon, normName, firstName, kidRosterId } from "./icons.js?v=202610092024";
-import { US_STATES, checkAddress, lookupUS, sameAddress, exactlySame, labelLines, oneLine } from "./address.js?v=202610092024";
+import { showLoading, hideLoading } from "./santa-loader.js?v=202610092037";
+import { babyIcon, normName, firstName, kidRosterId } from "./icons.js?v=202610092037";
+import { US_STATES, checkAddress, lookupUS, sameAddress, exactlySame, labelLines, oneLine } from "./address.js?v=202610092037";
 window.__ssReady = true;
-import { elfify, BLEEP_RE, TRAITS, WELL_ROUNDED, cleanTraits } from "./elfspeak.js?v=202610092024";
-import { threadsFor, watchThread, sendMessage, lastRead, markRead, unreadIn, msgTime, elfLabel, elfAvatar, STARTERS, MAX_LEN } from "./chat.js?v=202610092024";
-import { wishlistHelpers } from "./prompts.js?v=202610092024";
-import { calendarIcon } from "./calendar.js?v=202610092024";
-import { t, startTranslating } from "./i18n.js?v=202610092024";
+import { elfify, BLEEP_RE, TRAITS, WELL_ROUNDED, cleanTraits } from "./elfspeak.js?v=202610092037";
+import { threadsFor, watchThread, sendMessage, lastRead, markRead, unreadIn, msgTime, elfLabel, elfAvatar, STARTERS, MAX_LEN } from "./chat.js?v=202610092037";
+import { wishlistHelpers } from "./prompts.js?v=202610092037";
+import { calendarIcon } from "./calendar.js?v=202610092037";
+import { t, startTranslating } from "./i18n.js?v=202610092037";
 const tr = t;
 startTranslating();
-import { mountNav } from "./nav.js?v=202610092024";
+import { mountNav } from "./nav.js?v=202610092037";
 mountNav();
 
 const GID = groupIdFromUrl();
@@ -368,7 +377,8 @@ function render(){
     myHelpers.update();
     // Kids are optional per group; hide everything about them when they're off.
     const kids = kidsOn(g);
-    $("kidsSec").hidden = !kids; $("volunteerRow").hidden = $("volunteerHint").hidden = !kids;
+    $("volunteerRow").hidden = $("volunteerHint").hidden = !kids;
+    renderKidGate(kids);
     $("volunteer").checked = !!me.kidVolunteer;
     $("volunteer").disabled = !!g.drawn;
     $("kidForm").hidden = !!g.drawn;
@@ -421,13 +431,42 @@ function renderKids(){
       const st = el("p", "hint", "Tap Apply changes to save.");
       const bar = wishEditor(ta, k.wishId, st, "Tap Apply changes to save.");
       const h = wishlistHelpers(ta, "kid"); row._helpers = h;
-      row.append(h.chips, ta, h.meter, bar, st); list.append(row);
+      // Parents can take their own child off the list until names are drawn.
+      const rm = el("button", "small ghost kidremove", t("Remove {name}", { name: k.name })); rm.type = "button";
+      const cf = el("div", "confirm"); cf.hidden = true;
+      cf.append(el("span", null, t("Take {name} off the list? Their wishlist will be cleared.", { name: k.name })));
+      const yes = el("button", "small", t("Yes, remove")); yes.type = "button";
+      const no = el("button", "small ghost", t("Cancel")); no.type = "button";
+      const cr = el("div", "row"); cr.append(yes, no); cf.append(cr);
+      rm.onclick = () => { cf.hidden = false; rm.hidden = true; };
+      no.onclick = () => { cf.hidden = true; rm.hidden = false; };
+      yes.onclick = () => removeMyKid(k, yes);
+      row._rm = rm; row._cf = cf;
+      row.append(h.chips, ta, h.meter, bar, st, rm, cf); list.append(row);
     }
+    if (row._rm) { const d = !!S.game.drawn; row._rm.hidden = d || !row._cf.hidden; if (d) row._cf.hidden = true; }
     syncTextarea(row.querySelector("textarea"), k.wishId);
     if (row._helpers) row._helpers.update();
   });
-  $("kidRemoveHint").hidden = !S.kids.length;
 }
+// Before the draw, ask parents first ("Are any of your own children joining?") so nobody mistakes
+// "Add child" for signing up to buy a kid's gift. After the draw, only parents with kids see this.
+const kidAnswerKey = () => "ss-kids-q:" + GID;
+function kidAnswer(){ try { return localStorage.getItem(kidAnswerKey()); } catch (e) { return null; } }
+function setKidAnswer(v){ try { localStorage.setItem(kidAnswerKey(), v); } catch (e) {} }
+function renderKidGate(kidsAllowed){
+  const drawn = !!S.game.drawn, has = S.kids.length > 0, ans = kidAnswer();
+  $("kidsSec").hidden = !kidsAllowed || (drawn && !has);
+  const open = has || ans === "yes";
+  $("kidAsk").hidden = drawn || open || ans === "no";
+  $("kidNone").hidden = drawn || open || ans !== "no";
+  $("kidMain").hidden = !open;
+  $("kidBuyHint").hidden = drawn;
+  $("kidRemoveHint").hidden = !(drawn && has);
+}
+$("kidYes").onclick = () => { setKidAnswer("yes"); render(); $("kidName").focus(); };
+$("kidNo").onclick = () => { setKidAnswer("no"); render(); };
+$("kidChange").onclick = () => { setKidAnswer("yes"); render(); $("kidName").focus(); };
 
 // Shipped to the party: the party address with "Gift for <name>" already on the second line,
 // so the giver can paste it straight into a shipping form. Their own name goes nowhere.
@@ -711,7 +750,9 @@ function watchMe(secret){
     unsubs.push(onSnapshot(doc(db, "groups", GID, "people", secret), p => { S.me = p.exists() ? p.data() : null; if (S.me) watchWish(S.me.wishId); render(); }));
     unsubs.push(onSnapshot(collection(db, "groups", GID, "people", secret, "kids"), ks => {
       S.kids = ks.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
-      S.kids.forEach(k => watchWish(k.wishId)); render();
+      S.kids.forEach(k => watchWish(k.wishId));
+      if (!S.game.drawn) S.kids.forEach(indexKid);   // kids added before parents could remove them
+      render();
     }));
     unsubs.push(onSnapshot(doc(db, "groups", GID, "matches", secret), m => {
       S.match = m.exists() ? m.data() : null;
@@ -778,6 +819,33 @@ $("kidForm").addEventListener("submit", e => {
 $("kidSame").addEventListener("click", () => { hideKidConfirm(); $("kidName").value = ""; msg("kidMsg", "ok", "Great, no need to add them again. They're already on the list."); });
 $("kidDifferent").addEventListener("click", () => { const name = pendingKid; hideKidConfirm(); if (name) addKid(name); });
 
+// A private pointer that lets this parent remove their child later (see firestore.rules: kidIndex).
+// Written separately so adding a child never fails because of it.
+function indexKid(k){
+  const key = "ss-kididx:" + GID + ":" + k.id;
+  try { if (localStorage.getItem(key) || sessionStorage.getItem(key)) return; } catch (e) {}
+  setDoc(doc(db, "groups", GID, "kidIndex", k.rosterId), { parent: S.secret, kidId: k.id })
+    .then(() => { try { localStorage.setItem(key, "1"); } catch (e) {} })
+    // Refused usually means it already exists, but could mean the new rules aren't published yet,
+    // so only skip it for the rest of this visit and try again next time.
+    .catch(err => { if (err && err.code === "permission-denied") { try { sessionStorage.setItem(key, "1"); } catch (e) {} } });
+}
+async function removeMyKid(k, btn){
+  btn.disabled = true; msg("kidMsg", "", "");
+  showLoading(t("Taking {name} off the list…", { name: k.name }));
+  try {
+    try { await updateDoc(doc(db, "groups", GID, "wishes", k.wishId), { wishlist: "" }); } catch (e) {}
+    const b = writeBatch(db);
+    b.delete(doc(db, "groups", GID, "people", S.secret, "kids", k.id));
+    b.delete(doc(db, "groups", GID, "roster", k.rosterId));
+    b.delete(doc(db, "groups", GID, "kidIndex", k.rosterId));
+    await b.commit();
+    msg("kidMsg", "ok", t("{name} is off the list.", { name: k.name }));
+  } catch (e) {
+    btn.disabled = false;
+    msg("kidMsg", "err", S.game.drawn ? t("Names have already been drawn, so only the organizer can remove {name} now.", { name: k.name }) : t("Couldn't remove {name} from here. Ask the organizer to remove them from the organizer page.", { name: k.name }));
+  } finally { hideLoading(); }
+}
 async function addKid(name){
   $("kidBtn").disabled = true; msg("kidMsg", "", "");
   const kidId = randomId(16), wishId = randomId(), rosterId = kidRosterId(name) || ("kid-" + randomId(16)), createdAt = new Date().toISOString();
@@ -788,7 +856,7 @@ async function addKid(name){
   const myAddr = S.addresses[S.me.wishId];
   if (formatOf(S.game) !== "inperson" && myAddr) b.set(doc(db, "groups", GID, "addresses", wishId), kidAddress(myAddr, name));
   showLoading(t("Adding {name} to Santa's list…", { name }));
-  try { await b.commit(); $("kidName").value = ""; }
+  try { await b.commit(); $("kidName").value = ""; indexKid({ id: kidId, rosterId }); }
   catch (err) {
     msg("kidMsg", "err", S.game.drawn ? "Names have already been drawn, so you can't add a child now."
       : err && err.code === "permission-denied" ? t("{name} was just added by someone else. If that's a different child, add a last initial.", { name })
