@@ -1,8 +1,8 @@
 // Shared setup for every page: Firebase, small helpers, and "my groups".
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, getDoc, setDoc, deleteField, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-import { t, locale } from "./i18n.js?v=202610080314";
-import { firebaseConfig } from "./firebase-config.js?v=202610080314";
+import { t, locale } from "./i18n.js?v=202610092013";
+import { firebaseConfig } from "./firebase-config.js?v=202610092013";
 
 // Lets the site install as an app and open quickly on a weak connection.
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
@@ -192,6 +192,8 @@ export function smsGroupHref(numbers, body){
 
 // ---------- Group settings with sensible defaults for older groups ----------
 // format: "inperson" | "mixed" (some people join virtually) | "virtual" (everyone mails gifts)
+// "venue": everyone meets in person, but gifts are shipped ahead to the party address,
+// labeled with who they're for and never who they're from.
 export const formatOf = g => (g && g.format) || (g && g.virtual ? "virtual" : "inperson");
 // kind: "family" | "friends" | "coworkers" | "other"
 export const kindOf = g => (g && g.kind) || "family";

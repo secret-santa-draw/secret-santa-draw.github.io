@@ -325,3 +325,9 @@ body.sheetopen{overflow:hidden}
 .voicerow input[type=range]{width:100%;padding:0;border:none;background:transparent;accent-color:var(--pine)}
 .voiceends{display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted)}
 .voicepanel .hint{font-size:.8rem;margin:0}
+.venuebox{display:flex;flex-direction:column;gap:10px;border:1px dashed var(--line);border-radius:12px;padding:12px}
+.venuebox textarea{min-height:84px}
+.shipblock{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.giftlabel{background:var(--soft);border:1px dashed var(--gold);border-radius:10px;padding:10px 12px;font-weight:700}
+.shiptips summary{cursor:pointer;font-weight:600;color:var(--pine)}
+.shiptips ul{margin:6px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:4px;font-size:.9rem;color:var(--muted)}

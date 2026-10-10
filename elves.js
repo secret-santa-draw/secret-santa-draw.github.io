@@ -1,6 +1,6 @@
 // Little elf portraits for the secret chats. Each one is drawn from a "seed", so the same
 // chat always shows the same elf, and nothing about it comes from who the person really is.
-import { getLang } from "./i18n.js?v=202610080314";
+import { getLang } from "./i18n.js?v=202610092013";
 
 const HATS   = ["#d23b48", "#2f8a57", "#3a6fd8", "#8a4fd1", "#1f9c9a", "#e0a526", "#e2588f", "#e9772e"];
 const BGS    = ["#fde3e3", "#dff3e6", "#e1eafc", "#ece3fb", "#dcf3f2", "#fbf0d6", "#fde2ee", "#fde8da"];
